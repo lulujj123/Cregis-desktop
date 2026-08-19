@@ -21,7 +21,7 @@ pnpm install
 pnpm dev
 ```
 
-打开 http://localhost:4173/
+打开 http://localhost:4173/（dev）。Pages 预览见下方 §GitHub Pages。
 
 首次 `dev` / `build` 会自动构建 `eds-desktop` 的 tokens 与 components。
 
@@ -71,9 +71,10 @@ src/
 
 **预览地址（push 成功后）：** https://theyangsong.github.io/work-cregis-desktop/
 
-本地模拟 Pages 构建：
+本地模拟 Pages 构建（可与 `pnpm dev` 同时运行，preview 用 **4174** 端口）：
 
 ```bash
-VITE_BASE_PATH=/work-cregis-desktop/ pnpm build
-pnpm preview --base /work-cregis-desktop/
+pnpm preview:pages
 ```
+
+打开 http://localhost:4174/work-cregis-desktop/
