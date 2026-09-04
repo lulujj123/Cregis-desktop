@@ -9,6 +9,8 @@ import SigningBatchGlobalProgressHost from '@/scenes/tasks/signing/batch/Signing
 import { signingBatchFlowRegistry } from '@/scenes/tasks/signing/batch/signingBatchFlowContext';
 import SigningFlowHost from '@/scenes/tasks/signing/SigningFlowHost.vue';
 import { signingFlowRegistry } from '@/scenes/tasks/signing/signingFlowContext';
+import TeamAccountFlowHost from '@/scenes/manage/team-account/TeamAccountFlowHost.vue';
+import PaymentEngineFlowHost from '@/scenes/payment-engine/PaymentEngineFlowHost.vue';
 
 const approvalFlow = computed(() => approvalFlowRegistry.value);
 const signingFlow = computed(() => signingFlowRegistry.value);
@@ -24,6 +26,8 @@ const recordDetailFlow = computed(() => recordDetailFlowRegistry.value);
       <RecordDetailFlowHost v-if="recordDetailFlow" :flow="recordDetailFlow" />
       <SigningBatchFlowHost v-if="signingBatchFlow" :flow="signingBatchFlow" />
       <SigningBatchGlobalProgressHost />
+      <TeamAccountFlowHost />
+      <PaymentEngineFlowHost />
     </div>
   </div>
 </template>

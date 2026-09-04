@@ -9,6 +9,7 @@ import { useShellPageContext } from './pageKeyFromShell';
 import ShellDebugDevLauncher from './ShellDebugDevLauncher.vue';
 import ShellDebugLauncherAnchored from './ShellDebugLauncherAnchored.vue';
 import ShellDebugModelCapsule from './ShellDebugModelCapsule.vue';
+import ShellDebugWindowCapsule from './ShellDebugWindowCapsule.vue';
 import styles from './ShellDebugPlatform.module.css';
 
 useDeveloperInspectPicker();
@@ -25,6 +26,8 @@ const qaPanelTitle = computed(() => `${pageDisplayName.value} QA`);
       <ShellDebugModelCapsule />
 
       <ShellDebugDevLauncher />
+
+      <ShellDebugWindowCapsule />
 
       <ShellDebugLauncherAnchored
         label="QA"

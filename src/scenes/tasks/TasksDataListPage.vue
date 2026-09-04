@@ -35,6 +35,15 @@ import SentRequestReceiverListCell from './list-field/sentRequest/SentRequestRec
 import SentRequestSenderListCell from './list-field/sentRequest/SentRequestSenderListCell.vue';
 import SentRequestStatusListCell from './list-field/sentRequest/SentRequestStatusListCell.vue';
 import DataListHeaderSortTrigger from './DataListHeaderSortTrigger.vue';
+import ConditionFilterTrigger from '@/components/condition-filter/ConditionFilterTrigger.vue';
+import {
+  defaultFilterConditions,
+  filledFilterConditions,
+  rowMatchesFilterConditions,
+  TASKS_DATA_LIST_FILTER_DEFAULT_KEYS,
+  TASKS_DATA_LIST_FILTER_FIELDS,
+  type TasksDataListFilterCondition,
+} from './tasksDataListFilter';
 import pageStyles from './TasksDataListPage.module.css';
 import {
   DATA_LIST_FIGMA_HEADER_HEIGHT,
@@ -51,6 +60,7 @@ import {
   tasksDataListPrimaryActionLabel,
   tasksDataListShowsActionColumn,
   tasksDataListShowsExport,
+  tasksDataListShowsAutomation,
   tasksDataListShowsBatch,
   tasksDataListShowsStatusColumn,
   tasksDataListAmountColumnAlign,
@@ -184,6 +194,7 @@ watch(
 const customizeRef = computed(() => customize);
 
 const showBatchButton = computed(() => tasksDataListShowsBatch(menuItem.value));
+const showAutomationButton = computed(() => tasksDataListShowsAutomation(menuItem.value));
 const showToolBarSectionForMenu = computed(() => showBatchButton.value);
 const { active: listInteractionBlockActive } = useListRegionInteractionBlock();
 
@@ -494,8 +505,11 @@ async function handleBatchAction(
   });
 }
 
+const appliedFilterConditions = ref<TasksDataListFilterCondition[]>(defaultFilterConditions());
+
 const {
   DATA_LIST_FIGMA_PAGINER,
+  automationButton,
   batchButton,
   columnHeight,
   currentPage,
@@ -538,10 +552,25 @@ const {
   activeSort,
   handleBatchAction,
   computed(() => {
-    if (!isSigningMenu.value || !customize.selectMode) return null;
-    return (row: Record<string, unknown>) =>
-      !signingBatchFlow.shouldFilterRow(Number(row.id));
+    const signingFilter =
+      isSigningMenu.value && customize.selectMode
+        ? (row: Record<string, unknown>) =>
+            !signingBatchFlow.shouldFilterRow(Number(row.id))
+        : null;
+    const hasListFilter = filledFilterConditions(appliedFilterConditions.value).length > 0;
+    if (!signingFilter && !hasListFilter) return null;
+    return (row: Record<string, unknown>) => {
+      if (signingFilter && !signingFilter(row)) return false;
+      return rowMatchesFilterConditions(row, appliedFilterConditions.value);
+    };
   }),
+);
+
+const filterToolbarButton = computed(() =>
+  toolbarActionButtons.value.find((button) => button.key === 'filter'),
+);
+const otherToolbarActionButtons = computed(() =>
+  toolbarActionButtons.value.filter((button) => button.key !== 'filter'),
 );
 
 const listRegionRef = ref<HTMLElement | null>(null);
@@ -902,10 +931,29 @@ const displayBatchActions = computed(() => {
             >
               <EgIcon :name="batchButton.icon" size="sm" />
             </EgIconButtonPro>
+            <EgIconButtonPro
+              v-if="showAutomationButton"
+              :label="ui(automationButton.label)"
+              :badge="automationButton.badge"
+              :show-badge="automationButton.showBadge"
+              :show-reddot="automationButton.showReddot"
+              :disabled="skidContentLocked || automationButton.disabled"
+            >
+              <EgIcon :name="automationButton.icon" size="sm" />
+            </EgIconButtonPro>
           </template>
           <template v-if="showToolBarSectionForMenu" #section>
+            <ConditionFilterTrigger
+              v-if="filterToolbarButton"
+              :label="ui(filterToolbarButton.item.label)"
+              :icon="filterToolbarButton.item.icon"
+              :fields="TASKS_DATA_LIST_FILTER_FIELDS"
+              :default-field-keys="TASKS_DATA_LIST_FILTER_DEFAULT_KEYS"
+              :disabled="skidContentLocked || filterToolbarButton.item.disabled"
+              v-model:applied="appliedFilterConditions"
+            />
             <EgIconButtonPro
-              v-for="button in toolbarActionButtons"
+              v-for="button in otherToolbarActionButtons"
               :key="button.key"
               :label="ui(button.item.label)"
               :badge="button.item.badge"
@@ -918,8 +966,17 @@ const displayBatchActions = computed(() => {
             </EgIconButtonPro>
           </template>
           <template v-else #functional>
+            <ConditionFilterTrigger
+              v-if="filterToolbarButton"
+              :label="ui(filterToolbarButton.item.label)"
+              :icon="filterToolbarButton.item.icon"
+              :fields="TASKS_DATA_LIST_FILTER_FIELDS"
+              :default-field-keys="TASKS_DATA_LIST_FILTER_DEFAULT_KEYS"
+              :disabled="skidContentLocked || filterToolbarButton.item.disabled"
+              v-model:applied="appliedFilterConditions"
+            />
             <EgIconButtonPro
-              v-for="button in toolbarActionButtons"
+              v-for="button in otherToolbarActionButtons"
               :key="`functional-${button.key}`"
               :label="ui(button.item.label)"
               :badge="button.item.badge"
@@ -934,7 +991,10 @@ const displayBatchActions = computed(() => {
         </EgToolBar>
       </template>
 
-      <div ref="listRegionRef" :class="pageStyles.listRegion">
+      <div
+        ref="listRegionRef"
+        :class="pageStyles.listRegion"
+      >
         <div
           v-if="listInteractionBlockActive"
           :class="pageStyles.listInteractionBlocker"

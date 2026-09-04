@@ -33,11 +33,11 @@ export const cregisModuleMenuTitleFlotationItems: FlotationMenuItemPreset[] =
     };
   });
 
-/** WaaS → Doris Studio；其余浮层模块 → 模块名。 */
+/** WaaS / Payment Engine → Doris Studio；其余浮层模块 → 模块名。 */
 export function resolveCregisModuleMenuFlotationTitle(
   moduleTitle: CregisModuleMenuBusinessTitle,
 ): string {
-  if (moduleTitle === 'WaaS') return 'Doris Studio';
+  if (moduleTitle === 'WaaS' || moduleTitle === 'Payment Engine') return 'Doris Studio';
   return moduleTitle;
 }
 

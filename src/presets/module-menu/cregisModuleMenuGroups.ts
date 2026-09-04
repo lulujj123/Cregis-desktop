@@ -56,29 +56,16 @@ const cregisTasksModuleMenuGroups: ModuleMenuPresetGroup[] = [
   },
 ];
 
-/** Cregis Payment Engine — 业务定稿菜单。 */
+/** Cregis Payment Engine — Figma C0167 菜单。 */
 const cregisPaymentEngineModuleMenuGroups: ModuleMenuPresetGroup[] = [
   {
     items: [
       { label: 'Order Record', icon: 'eds-text-journal' },
-      { label: 'Bulk Transfer Record', icon: 'eds-arrow-left-right' },
-      { label: 'Refund Record', icon: 'eds-arrow-exit-left' },
+      { label: 'Settlement Record', icon: 'eds-task-list' },
       { label: 'Payment Exception Record', icon: 'eds-text-abnormal', showReddot: true },
+      { label: 'Callback Record', icon: 'eds-arrow-callback', showReddot: true },
+      { label: 'Settings', icon: 'eds-gear' },
     ],
-  },
-  {
-    title: 'Payout Record',
-    items: [{ label: 'Wallet Payout', icon: 'eds-arrow-launch-square' }],
-  },
-  {
-    title: 'Callback',
-    items: [
-      { label: 'Callback Error', icon: 'eds-text-abnormal' },
-      { label: 'History Callback', icon: 'eds-history' },
-    ],
-  },
-  {
-    items: [{ label: 'Settings', icon: 'eds-gear' }],
   },
 ];
 

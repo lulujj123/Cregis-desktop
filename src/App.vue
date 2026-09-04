@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { EgContainer, EgTooltip } from '@eds/desktop-components';
 import { RouterView } from 'vue-router';
+import AppPreviewResizeHandles from '@/app-preview/AppPreviewResizeHandles.vue';
 import AppPopupOverlayHost from '@/components/AppPopupOverlayHost.vue';
 import MultiSignInvitationFloatHost from '@/scenes/tasks/signing/multiSignInvitation/MultiSignInvitationFloatHost.vue';
 </script>
@@ -17,5 +18,6 @@ import MultiSignInvitationFloatHost from '@/scenes/tasks/signing/multiSignInvita
     </EgContainer>
     <AppPopupOverlayHost />
     <MultiSignInvitationFloatHost />
+    <AppPreviewResizeHandles />
   </EgTooltip>
 </template>

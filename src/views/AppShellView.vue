@@ -4,6 +4,7 @@ import { EgLayout, EgNavBar } from '@eds/desktop-components';
 import CregisModuleMenu from '@/components/CregisModuleMenu.vue';
 import { useAppI18n } from '@/composables/useAppI18n';
 import PreferencePage from '@/scenes/account-settings/PreferencePage.vue';
+import TeamAccountPage from '@/scenes/manage/team-account/TeamAccountPage.vue';
 import {
   DEFAULT_CREGIS_MODULE_MENU_BUSINESS_TITLE,
   navLabelShouldHideModuleMenu,
@@ -13,6 +14,11 @@ import {
 import { getCregisModuleMenuGroups } from '@/presets/module-menu/cregisModuleMenuGroups';
 import { cregisNavBarDeclarativeAttrs } from '@/presets/nav/cregisNavBarDeclarative';
 import { resolveEnglishUiText } from '@/i18n/translateUiText';
+import PaymentEnginePage from '@/scenes/payment-engine/PaymentEnginePage.vue';
+import {
+  DEFAULT_PAYMENT_ENGINE_MENU_ITEM,
+  isPaymentEngineMenuItem,
+} from '@/scenes/payment-engine/paymentEngineData';
 import TasksDataListPage from '@/scenes/tasks/TasksDataListPage.vue';
 import { setMultiSignCollaborationModuleActive } from '@/scenes/tasks/signing/multiSignInvitation/multiSignInvitationStore';
 import { useTasksModuleMenuGroups } from '@/scenes/tasks/useTasksModuleMenuGroups';
@@ -59,6 +65,17 @@ const showPreferencePage = computed(
   () => activeModuleTitle.value === 'Account Settings' && activeModuleMenuItem.value === 'Preference',
 );
 
+const showTeamAccountPage = computed(
+  () => activeModuleTitle.value === 'Manage' && activeModuleMenuItem.value === 'Team Account Balance',
+);
+
+const showPaymentEnginePage = computed(
+  () =>
+    activeModuleTitle.value === 'Payment Engine' &&
+    activeModuleMenuItem.value !== null &&
+    isPaymentEngineMenuItem(activeModuleMenuItem.value),
+);
+
 const tasksModuleMenuGroups = useTasksModuleMenuGroups();
 
 const moduleMenuGroups = computed(() => {
@@ -75,6 +92,14 @@ watch(activeModuleTitle, (title) => {
   }
   if (title === 'Account Settings') {
     activeModuleMenuItem.value = 'Preference';
+    return;
+  }
+  if (title === 'Manage') {
+    activeModuleMenuItem.value = 'Team Subscription';
+    return;
+  }
+  if (title === 'Payment Engine') {
+    activeModuleMenuItem.value = DEFAULT_PAYMENT_ENGINE_MENU_ITEM;
     return;
   }
   activeModuleMenuItem.value = null;
@@ -110,6 +135,18 @@ function onModuleMenuItemSelect(label: string) {
 
   if (activeModuleTitle.value === 'Account Settings') {
     activeModuleMenuItem.value = label;
+    return;
+  }
+
+  if (activeModuleTitle.value === 'Manage') {
+    activeModuleMenuItem.value = label;
+    return;
+  }
+
+  if (activeModuleTitle.value === 'Payment Engine') {
+    if (isPaymentEngineMenuItem(label)) {
+      activeModuleMenuItem.value = label;
+    }
   }
 }
 </script>
@@ -126,6 +163,7 @@ function onModuleMenuItemSelect(label: string) {
       <CregisModuleMenu
         :title="activeModuleTitle"
         :groups="moduleMenuGroups"
+        :focused-label="activeModuleMenuItem"
         @item-select="onModuleMenuItemSelect"
       />
     </template>
@@ -136,6 +174,12 @@ function onModuleMenuItemSelect(label: string) {
       :toolbar-title="activeModuleMenuItem"
     />
     <PreferencePage v-else-if="showPreferencePage" />
+    <TeamAccountPage v-else-if="showTeamAccountPage" />
+    <PaymentEnginePage
+      v-else-if="showPaymentEnginePage && activeModuleMenuItem"
+      :key="activeModuleMenuItem"
+      :menu-item="activeModuleMenuItem"
+    />
     <div v-else class="app-shell-main">
       <p class="app-shell-main__hint">{{ messages.appShellMainHint }}</p>
     </div>

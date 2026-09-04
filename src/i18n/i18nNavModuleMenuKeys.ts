@@ -34,9 +34,11 @@ export const I18N_NAV_MODULE_MENU_CATALOG_KEYS = new Set<string>([
   'About Cregis',
   // Payment Engine menu
   'Order Record',
+  'Settlement Record',
   'Bulk Transfer Record',
   'Refund Record',
   'Payment Exception Record',
+  'Callback Record',
   'Payout Record',
   'Wallet Payout',
   'Callback',

@@ -1,0 +1,420 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  box-sizing: border-box;
+  min-height: 0;
+  height: 100%;
+  padding: var(--spacing-5);
+  overflow: hidden;
+  background: var(--box-page);
+}
+
+.hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+  flex-shrink: 0;
+}
+
+.heroLabel {
+  margin: 0;
+  color: var(--text-base-secondary);
+  font-size: var(--eds-body-small-size);
+  font-weight: var(--eds-body-small-strong-weight);
+  line-height: var(--eds-body-small-line-height);
+}
+
+.heroAmount {
+  margin: var(--spacing-1) 0 0;
+  color: var(--text-base-secondary);
+  font-size: var(--eds-title-size);
+  font-weight: var(--eds-title-weight);
+  line-height: var(--eds-title-line-height);
+  font-variant-numeric: tabular-nums;
+}
+
+.heroActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  flex-shrink: 0;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-3);
+  flex-shrink: 0;
+}
+
+.stat {
+  padding: var(--spacing-4);
+  border-radius: var(--radius-md);
+  border: var(--stroke-sm) solid var(--stroke-divider-module);
+  background: var(--box-page);
+}
+
+.statLabel {
+  margin: 0;
+  color: var(--text-base-secondary);
+  font-size: var(--eds-body-small-size);
+  font-weight: var(--eds-body-small-weight);
+  line-height: var(--eds-body-small-line-height);
+}
+
+.statValue {
+  margin: var(--spacing-1) 0 0;
+  color: var(--text-base-secondary);
+  font-size: var(--eds-title-size);
+  font-weight: var(--eds-title-weight);
+  line-height: var(--eds-title-line-height);
+  font-variant-numeric: tabular-nums;
+}
+
+.panels {
+  display: grid;
+  grid-template-columns: 1.9fr 1fr;
+  gap: var(--spacing-3);
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  border: var(--stroke-sm) solid var(--stroke-divider-module);
+  background: var(--box-page);
+}
+
+.panel :global(.eds-tool-bar-title p) {
+  font-size: var(--eds-body-medium-size);
+  font-weight: var(--eds-body-medium-weight);
+  line-height: var(--eds-body-medium-line-height);
+}
+
+.panelLayout {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.listRegion {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 0%;
+  width: 100%;
+  overflow: hidden;
+  padding-bottom: 0;
+}
+
+.listRegion :global(.eds-data-list) {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.listFill {
+  display: block;
+  flex: 1 1 0%;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.billListFill {
+  box-sizing: border-box;
+  overflow: auto;
+}
+
+.billChromeSpacer {
+  height: var(--eds-layout-chrome-inset-top, 0);
+}
+
+.yearGroup {
+  display: block;
+  width: 100%;
+}
+
+.yearBar {
+  position: sticky;
+  top: var(--eds-layout-chrome-inset-top, 0);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 0 var(--spacing-6);
+  background: var(--data-table-head);
+  color: var(--text-base-primary);
+  font-size: var(--eds-footnote-strong-size);
+  font-weight: var(--eds-footnote-strong-weight);
+  line-height: var(--eds-footnote-strong-line-height);
+}
+
+.billRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: var(--spacing-2);
+  flex-shrink: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 var(--spacing-4) 0 var(--spacing-6);
+}
+
+.billMain {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-05);
+  min-width: 0;
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  text-align: left;
+}
+
+.billTitle,
+.billMeta {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.billTextFull,
+.billTextCompact {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.billTextFull {
+  display: flex;
+  width: 100%;
+}
+
+.billTextCompact {
+  display: none;
+}
+
+/* Matches --app-preview-min-width on the client window. */
+@media (max-width: 960px) {
+  .page {
+    overflow: hidden;
+  }
+
+  .panels {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .panel {
+    height: auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .listRegion {
+    padding-bottom: 0;
+    overflow: hidden;
+  }
+
+  .listFill {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    --eds-layout-chrome-inset-bottom: 0;
+  }
+
+  .billListFill {
+    overflow-y: auto;
+  }
+
+  .billTextFull {
+    display: flex;
+    width: 100%;
+  }
+
+  .billTextCompact {
+    display: none;
+  }
+}
+
+.listFill :global(.eds-data-list) {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+.comboHeader {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1-5);
+  width: auto;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  color: var(--text-base-tertiary);
+  font-size: var(--eds-footnote-strong-size);
+  font-weight: var(--eds-footnote-strong-weight);
+  line-height: var(--eds-footnote-strong-line-height);
+}
+
+.comboHeaderAlignEnd {
+  margin-left: auto;
+}
+
+.comboHeaderSegment {
+  display: inline-flex;
+  flex: 0 1 auto;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.comboHeaderSegmentTextWrap {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  flex: 1 1 0;
+}
+
+.comboHeaderSegmentText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  max-width: 100%;
+  cursor: default;
+  user-select: none;
+}
+
+.comboHeaderSegment > :global(.eds-flotation) {
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.comboHeader > :global(.eds-divider) {
+  align-self: center;
+  flex-shrink: 0;
+  height: var(--spacing-2-5);
+  min-height: var(--spacing-2-5);
+  max-height: var(--spacing-2-5);
+  background: var(--stroke-base-quaternary);
+}
+
+.comboCell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-05);
+  width: 100%;
+  min-width: 0;
+}
+
+.comboPrimary {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  min-width: 0;
+}
+
+.comboSecondary {
+  color: var(--text-base-tertiary);
+  font-size: var(--eds-footnote-size);
+  line-height: var(--eds-footnote-line-height);
+}
+
+.dirIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 22px;
+  height: 22px;
+  padding: var(--spacing-1-5);
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  box-shadow: 0 0 0 var(--stroke-xl) var(--stroke-face-primary);
+  color: var(--text-same-white-primary);
+}
+
+.dirIn {
+  background: var(--status-success);
+}
+
+.dirOut {
+  background: var(--status-danger);
+}
+
+.dirIconGlyph {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.txType {
+  color: var(--text-base-primary);
+  font-size: var(--eds-body-medium-size);
+  font-weight: var(--eds-body-medium-weight);
+  line-height: var(--eds-body-medium-line-height);
+}
+
+.billActions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-1);
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.earlier,
+.endNote {
+  margin: 0;
+  padding: var(--spacing-3) var(--spacing-4) var(--spacing-4);
+  color: var(--text-base-tertiary);
+  font-size: var(--eds-body-small-size);
+  line-height: var(--eds-body-small-line-height);
+  flex-shrink: 0;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.earlier {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.toastHost {
+  position: absolute;
+  top: var(--spacing-10);
+  left: 50%;
+  z-index: 40;
+  transform: translateX(-50%);
+  pointer-events: none;
+}

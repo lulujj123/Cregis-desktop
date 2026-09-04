@@ -25,6 +25,7 @@ import { resolveTasksModuleMenuDisplayLabel } from '@/scenes/tasks/tasksDataList
 const props = defineProps<{
   title: CregisModuleMenuBusinessTitle;
   groups: ModuleMenuPresetGroup[];
+  focusedLabel?: string | null;
 }>();
 
 const emit = defineEmits<{
@@ -101,6 +102,7 @@ const menuTitle = computed(() => {
         <EgModuleMenuItem
           :tier="item.tier ?? 1"
           :label="moduleMenuItemLabel(item.label)"
+          :focused="props.focusedLabel === item.label"
           :message="item.message?.trim() || undefined"
           :message-type="item.messageType ?? 'subtle'"
           :message-focus-background="item.focusBackground ?? 'inherit'"
