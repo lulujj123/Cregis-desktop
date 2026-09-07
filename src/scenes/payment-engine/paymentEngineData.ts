@@ -34,7 +34,7 @@ export type OrderStatus =
   | 'Overpaid'
   | 'Underpaid'
   | 'Expired'
-  | 'Cancelled'
+  | 'Canceled'
   | 'Paid'
   | 'Completed';
 
@@ -148,7 +148,7 @@ export const ORDER_RECORDS: OrderRecordRow[] = [
     id: 'order-5',
     orderId: 'po1442856738070532',
     merchantOrderId: '897bfc89f49640cca5553ad26883c616',
-    status: 'Cancelled',
+    status: 'Canceled',
     createdAt: ORDER_TIME,
     receivedAmount: '0.0091',
     receivedSymbol: 'ETH',
@@ -432,13 +432,7 @@ export const CALLBACK_RECORDS: CallbackRecordRow[] = [
   },
 ];
 
-export const ORDER_PAGINER_STATS = [
-  { text: 'Total Actual Received Amount', number: '0' },
-  { text: 'Total Transaction Fee', number: '0' },
-  { text: 'Total Settled Amount', number: '0' },
-];
-
-export const SETTLEMENT_PAGINER_STATS = [
+export const PAYMENT_ENGINE_PAGINER_STATS = [
   { text: 'Total Actual Received Amount', number: '500K HYPE' },
   { text: 'Total Transaction Fee', number: '0.0699 HYPE' },
   { text: 'Total Settled Amount', number: '20.55M HYPE' },

@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import {
-  EgButton,
   EgCheckbox,
   EgComboActionFlotation,
+  EgComboActionPopupWindow,
   EgComboInputItem,
   EgDetail,
   EgDialog,
   EgFlotation,
   EgFlotationTrigger,
-  EgIcon,
   EgInput,
   EgPopup,
   EgRadio,
@@ -214,6 +213,7 @@ function onSendMemberClick(id: string) {
     v-model:open="alertShell.popupOpen.value"
     uses="dialog"
     dialog-type="standard"
+    alert-vertical-align="center"
     @close="alertShell.onPopupClosed"
   >
     <EgDialog
@@ -318,20 +318,13 @@ function onSendMemberClick(id: string) {
             @item-click="(item) => chooseRechargeNetwork(item.label)"
           >
             <template #trigger="{ expanded }">
-              <EgButton
-                tone="brand"
-                variant="solid"
-                size="sm"
-                icon-position="trailing"
-                :active="expanded"
-              >
-                {{ selectedRechargeNetwork }}
-                <template #icon>
-                  <span :class="styles.networkGlyph" aria-hidden="true">
-                    <EgIcon name="eds-arrow-toggle-vertical" fit />
-                  </span>
-                </template>
-              </EgButton>
+              <EgFlotationTrigger
+                trigger-style="outline"
+                size="md"
+                width-mode="adaptive"
+                :label="selectedRechargeNetwork"
+                :expanded="expanded"
+              />
             </template>
           </EgFlotation>
         </div>
@@ -349,9 +342,8 @@ function onSendMemberClick(id: string) {
           <p :class="styles.rechargeNote">{{ rechargeNote }}</p>
         </div>
       </div>
-      <EgComboActionFlotation
+      <EgComboActionPopupWindow
         tone="decor"
-        divider
         :confirm-label="ui('Copy Address')"
         :cancel-label="ui('Cancel')"
         @confirm="rechargeShell.popupOpen.value = false"

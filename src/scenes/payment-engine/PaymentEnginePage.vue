@@ -125,7 +125,7 @@ function cryptoName(symbol: string): CryptoName {
 function orderStatusKind(status: OrderStatus): TagStatus {
   if (status === 'Overpaid') return 'danger';
   if (status === 'Underpaid') return 'warning';
-  if (status === 'Expired' || status === 'Cancelled') return 'invalid';
+  if (status === 'Expired' || status === 'Canceled') return 'invalid';
   return 'success';
 }
 
@@ -136,6 +136,11 @@ function orderStatusLabel(status: OrderStatus): string {
 
 function settlementStatusKind(status: SettlementStatus): TagStatus {
   return status === 'Settling' ? 'warning' : 'success';
+}
+
+function onExportClick() {
+  if (!isOrder.value && !isSettlement.value) return;
+  paymentEngineState.exportOpen = true;
 }
 
 function exceptionStatusKind(status: ExceptionStatus): TagStatus {
@@ -177,7 +182,10 @@ function asCallback(data: DataListItem): CallbackRecordRow {
             <EgIconButtonPro :label="ui('Refresh')" @click="refreshList">
               <EgIcon name="eds-arrow-refresh" size="sm" />
             </EgIconButtonPro>
-            <EgIconButtonPro :label="ui('Export')">
+            <EgIconButtonPro
+              :label="ui('Export')"
+              @click="onExportClick"
+            >
               <EgIcon name="eds-arrow-download" size="sm" />
             </EgIconButtonPro>
           </template>

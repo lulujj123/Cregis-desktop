@@ -43,10 +43,13 @@ export function usePaginerStatisticsCollapse(
       return;
     }
 
-    const available =
-      raw.clientWidth - readSpacingPx('--spacing-4', 16) - readSpacingPx('--spacing-6', 24);
-    const needed = nextPage.getBoundingClientRect().width + measure.scrollWidth;
-    statisticsCollapse.value = needed > available;
+    const startPad = readSpacingPx('--spacing-4', 16);
+    const endPad = readSpacingPx('--spacing-6', 24);
+    const clusterGap = readSpacingPx('--spacing-4', 16);
+    const available = raw.clientWidth - startPad - endPad;
+    const needed =
+      nextPage.getBoundingClientRect().width + clusterGap + measure.scrollWidth;
+    statisticsCollapse.value = needed >= available;
   }
 
   function observe() {

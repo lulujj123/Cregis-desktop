@@ -5,7 +5,7 @@ import {
   type TagStatus,
 } from '@eds/desktop-components';
 import { resolveCryptoNameFromSymbol } from '@/scenes/tasks/list-field/listFieldCryptoResolve';
-import type { OrderDetailVariant, OrderRecordRow, OrderStatus, SettlementRecordRow } from './paymentEngineData';
+import type { OrderRecordRow, OrderStatus, SettlementRecordRow } from './paymentEngineData';
 
 function statusRow(title: string, tag: string, tagStatus?: TagStatus): DetailItemData {
   const row = createDetailApplyItemRow('status', { title, tag });
@@ -22,7 +22,7 @@ const DETAIL_RECEIVER = 'bc1qsmu69g72d7rdzwv7y7va0rd7cunen7tcer3tn8';
 export function orderHeadlineStatus(status: OrderStatus): TagStatus {
   if (status === 'Overpaid') return 'danger';
   if (status === 'Underpaid' || status === 'New') return status === 'New' ? 'success' : 'warning';
-  if (status === 'Expired' || status === 'Cancelled') return 'invalid';
+  if (status === 'Expired' || status === 'Canceled') return 'invalid';
   return 'success';
 }
 
@@ -61,6 +61,55 @@ function paymentBlockItems(ui: (key: string) => string): DetailItemData[] {
       tag: 'EverGreen',
     }),
   ];
+}
+
+/** Paid · Payment Information — Figma 1751:25482; 补款字段与首次付款相同。 */
+function paidPaymentBlockItems(ui: (key: string) => string): DetailItemData[] {
+  return [
+    createDetailApplyItemRow('brand-number', {
+      title: ui('Payment ID'),
+      value: DETAIL_ORDER_ID,
+    }),
+    createDetailApplyItemRow('text', {
+      title: ui('Payment Wallet'),
+      value: 'MetaMask',
+    }),
+    createDetailApplyItemRow('amount', {
+      title: ui('Payment Amount'),
+      value: '0.02256 USDC',
+      tag: 'Bitcoin',
+    }),
+    createDetailApplyItemRow('time', {
+      title: ui('Creation Time'),
+      value: DETAIL_TIME,
+    }),
+    createDetailApplyItemRow('sender', {
+      title: ui('Sender'),
+      value: DETAIL_SENDER,
+      tag: '',
+    }),
+    createDetailApplyItemRow('receiver', {
+      title: ui('Receiver'),
+      value: DETAIL_RECEIVER,
+      tag: 'Mr. Wang',
+    }),
+    createDetailApplyItemRow('txid', {
+      title: ui('TxID'),
+      value: DETAIL_HASH,
+    }),
+  ];
+}
+
+function showAdditionalPayment(row: OrderRecordRow): boolean {
+  return row.status === 'Paid' || row.detailVariant === 'topup';
+}
+
+function showRefundTab(row: OrderRecordRow): boolean {
+  return row.status === 'Canceled' || row.detailVariant === 'refund';
+}
+
+function showSettlementDetailTab(row: OrderRecordRow): boolean {
+  return row.status === 'Paid';
 }
 
 function orderDetailItems(ui: (key: string) => string): DetailItemData[] {
@@ -179,18 +228,52 @@ function orderSettlementItems(ui: (key: string) => string): DetailItemData[] {
   ];
 }
 
-export function orderTabLabels(variant: OrderDetailVariant, ui: (key: string) => string): string[] {
-  if (variant === 'refund') {
-    return [ui('Order Detail'), ui('Payment Information'), ui('Refund Information')];
+/** Paid · Settlement Detail — Figma 1751:25561 */
+function paidSettlementDetailItems(ui: (key: string) => string): DetailItemData[] {
+  return [
+    createDetailApplyItemRow('brand-number', {
+      title: ui('Settlement ID'),
+      value: DETAIL_ORDER_ID,
+    }),
+    statusRow(ui('Settlement Status'), ui('Refund in progress'), 'warning'),
+    {
+      ...createDetailApplyItemRow('sender', {
+        title: ui('Settlement Address'),
+        value: DETAIL_SENDER,
+        tag: '',
+      }),
+      titleIcon: 'eds-blockchain-address',
+    },
+    createDetailApplyItemRow('time', {
+      title: ui('Settlement Creation Time'),
+      value: DETAIL_TIME,
+    }),
+    createDetailApplyItemRow('amount', {
+      title: ui('Order Settled Amount'),
+      value: '0.02256 USDC',
+      tag: 'Bitcoin',
+    }),
+    createDetailApplyItemRow('fee', {
+      title: ui('Order Transaction Fee'),
+      value: '0.0006 USDC',
+    }),
+  ];
+}
+
+export function orderTabLabels(row: OrderRecordRow, ui: (key: string) => string): string[] {
+  const labels = [ui('Order Detail'), ui('Payment Information')];
+  if (showRefundTab(row)) {
+    labels.push(ui('Refund Information'));
+  } else if (showSettlementDetailTab(row)) {
+    labels.push(ui('Settlement Detail'));
+  } else if (row.detailVariant === 'settlement') {
+    labels.push(ui('Settlement Information'));
   }
-  if (variant === 'settlement') {
-    return [ui('Order Detail'), ui('Payment Information'), ui('Settlement Information')];
-  }
-  return [ui('Order Detail'), ui('Payment Information')];
+  return labels;
 }
 
 export function orderDetailSections(
-  variant: OrderDetailVariant,
+  row: OrderRecordRow,
   tabIndex: number,
   ui: (key: string) => string,
 ): DetailSectionData[] {
@@ -198,61 +281,120 @@ export function orderDetailSections(
     return [{ items: orderDetailItems(ui) }];
   }
   if (tabIndex === 1) {
-    if (variant === 'topup') {
+    if (showAdditionalPayment(row)) {
+      const items = row.status === 'Paid' ? paidPaymentBlockItems(ui) : paymentBlockItems(ui);
       return [
-        { title: ui('First Payment'), items: paymentBlockItems(ui), showDivider: true },
-        { title: ui('Additional Payment'), items: paymentBlockItems(ui) },
+        { title: ui('First Payment'), items, showDivider: true },
+        { title: ui('Additional Payment'), items },
       ];
     }
     return [{ title: ui('First Payment'), items: paymentBlockItems(ui) }];
   }
-  if (variant === 'refund') {
+  if (showRefundTab(row)) {
     return [{ items: refundItems(ui) }];
   }
+  if (showSettlementDetailTab(row)) {
+    return [{ items: paidSettlementDetailItems(ui) }];
+  }
   return [{ items: orderSettlementItems(ui) }];
+}
+
+function settlingSettlementItems(
+  row: SettlementRecordRow,
+  ui: (key: string) => string,
+): DetailItemData[] {
+  return [
+    createDetailApplyItemRow('crypto', {
+      title: ui('Token'),
+      value: row.token,
+      tag: row.networkTag,
+      valueSymbolCrypto: resolveCryptoNameFromSymbol(row.token) ?? 'eds-usdc-usdcoin',
+    }),
+    createDetailApplyItemRow('text', {
+      title: ui('Address'),
+      value: row.address,
+    }),
+    statusRow(ui('Status'), ui(row.status), 'warning'),
+    createDetailApplyItemRow('time', {
+      title: ui('Creation Time'),
+      value: row.createdAt.replace(/ {2}/g, ' '),
+    }),
+    createDetailApplyItemRow('brand-number', {
+      title: ui('Settlement Number'),
+      value: row.settlementNumber,
+    }),
+    createDetailApplyItemRow('amount', {
+      title: ui('Actual Received Amount'),
+      value: `${row.receivedAmount} ${row.receivedSymbol}`,
+    }),
+    createDetailApplyItemRow('amount', {
+      title: ui('Total Settled Amount'),
+      value: row.settledAmount,
+    }),
+    createDetailApplyItemRow('fee', {
+      title: ui('Total Transaction Fee'),
+      value: '0.0699 HYPE',
+    }),
+  ];
+}
+
+/** Settlement Record · Settled — Figma 2671:14778 */
+function settledSettlementItems(ui: (key: string) => string): DetailItemData[] {
+  return [
+    createDetailApplyItemRow('brand-number', {
+      title: ui('Settlement Number'),
+      value: DETAIL_ORDER_ID,
+    }),
+    createDetailApplyItemRow('crypto', {
+      title: ui('Settlement Currency'),
+      value: 'BTC',
+      tag: 'Bitcoin Lightning',
+      valueSymbolCrypto: 'eds-btc-bitcoin',
+    }),
+    {
+      ...createDetailApplyItemRow('text', {
+        title: ui('Total Order Settlement Count'),
+        value: '2,567',
+      }),
+      titleIcon: 'eds-text-numerical',
+    },
+    createDetailApplyItemRow('amount', {
+      title: ui('Total Received Amount'),
+      value: '0.02256 BTC',
+      tag: 'Bitcoin Lightning',
+    }),
+    createDetailApplyItemRow('amount', {
+      title: ui('Total Fee'),
+      value: '0.02256 BTC',
+      tag: '',
+    }),
+    {
+      ...createDetailApplyItemRow('sender', {
+        title: ui('Settlement Address'),
+        value: DETAIL_SENDER,
+        tag: '',
+      }),
+      titleIcon: 'eds-blockchain-address',
+    },
+    createDetailApplyItemRow('time', {
+      title: ui('Settlement Time'),
+      value: DETAIL_TIME,
+    }),
+    createDetailApplyItemRow('txid', {
+      title: ui('TxID'),
+      value: DETAIL_HASH,
+    }),
+  ];
 }
 
 export function settlementDetailSections(
   row: SettlementRecordRow,
   ui: (key: string) => string,
 ): DetailSectionData[] {
-  return [
-    {
-      items: [
-        createDetailApplyItemRow('crypto', {
-          title: ui('Token'),
-          value: row.token,
-          tag: row.networkTag,
-          valueSymbolCrypto: resolveCryptoNameFromSymbol(row.token) ?? 'eds-usdc-usdcoin',
-        }),
-        createDetailApplyItemRow('text', {
-          title: ui('Address'),
-          value: row.address,
-        }),
-        statusRow(ui('Status'), ui(row.status), row.status === 'Settling' ? 'warning' : 'success'),
-        createDetailApplyItemRow('time', {
-          title: ui('Creation Time'),
-          value: row.createdAt.replace(/ {2}/g, ' '),
-        }),
-        createDetailApplyItemRow('brand-number', {
-          title: ui('Settlement Number'),
-          value: row.settlementNumber,
-        }),
-        createDetailApplyItemRow('amount', {
-          title: ui('Actual Received Amount'),
-          value: `${row.receivedAmount} ${row.receivedSymbol}`,
-        }),
-        createDetailApplyItemRow('amount', {
-          title: ui('Total Settled Amount'),
-          value: row.settledAmount,
-        }),
-        createDetailApplyItemRow('fee', {
-          title: ui('Total Transaction Fee'),
-          value: '0.0699 HYPE',
-        }),
-      ],
-    },
-  ];
+  if (row.status === 'Settled') {
+    return [{ items: settledSettlementItems(ui) }];
+  }
+  return [{ items: settlingSettlementItems(row, ui) }];
 }
 
 export function orderHeadline(row: OrderRecordRow): string {
@@ -260,5 +402,6 @@ export function orderHeadline(row: OrderRecordRow): string {
 }
 
 export function settlementHeadline(row: SettlementRecordRow): string {
+  if (row.status === 'Settled') return '1,085,620.37 BTC';
   return `${row.receivedAmount} ${row.receivedSymbol}`;
 }

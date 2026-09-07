@@ -76,7 +76,7 @@ export const DEMO_TIME = '2031-12-23  10:23:00';
 export const DEMO_HASH = '60bfe69ce24d82dd7795722130666a4cfa34f1308120cfffdcb2a70bf295ba39';
 export const DEMO_ORDER = 'ORD-20311223-8821';
 export const RECHARGE_ADDR = 'TCogAdKNMyU2P4HA4aiuj7ZqyZPzE2Hx2r';
-export const RECHARGE_NETWORKS = ['USDT-TRC20#Shasta'] as const;
+export const RECHARGE_NETWORKS = ['USDT-TRC20#Shasta', 'USDT-BEP20#Testnet'] as const;
 export const AVAILABLE_BALANCE = '$999,910,983.35';
 
 export const TX_TYPES = [

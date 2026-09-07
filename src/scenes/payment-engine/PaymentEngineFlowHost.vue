@@ -1,10 +1,20 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { EgDetail, EgDialog, EgPopup, EgVerify, closeAllAnchoredTooltips, useVerifySubmit } from '@eds/desktop-components';
+import {
+  EgDetail,
+  EgDialog,
+  EgIcon,
+  EgIconButton,
+  EgPopup,
+  EgVerify,
+  closeAllAnchoredTooltips,
+  useVerifySubmit,
+} from '@eds/desktop-components';
 import { useAppI18n } from '@/composables/useAppI18n';
 import { usePopupShellLifecycle } from '@/scenes/tasks/shared/usePopupShellLifecycle';
 import { paymentEngineState, usePaymentEnginePage } from './usePaymentEnginePage';
 import { paymentEngineSettingsState } from './paymentEngineSettings';
+import styles from './PaymentEngineFlowHost.module.css';
 
 const { ui } = useAppI18n();
 const page = usePaymentEnginePage(() => 'Order Record');
@@ -21,6 +31,13 @@ const disableCallbackShell = usePopupShellLifecycle({
   open: () => paymentEngineSettingsState.disableCallbackOpen,
   onClosed: () => {
     paymentEngineSettingsState.disableCallbackOpen = false;
+  },
+});
+
+const exportShell = usePopupShellLifecycle({
+  open: () => paymentEngineState.exportOpen,
+  onClosed: () => {
+    paymentEngineState.exportOpen = false;
   },
 });
 
@@ -55,6 +72,9 @@ const googleVerifyShell = usePopupShellLifecycle({
   },
 });
 
+const EXPORT_UPGRADE_BODY =
+  "We've optimized the data architecture, integrating orders, payments, refunds and settlements into categorized tabs. The layout is more intuitive and clearer than ever, helping you quickly find the financial details you need.";
+
 const disableCallbackMessage = computed(
   () =>
     ui(
@@ -62,9 +82,15 @@ const disableCallbackMessage = computed(
     ),
 );
 
+const exportUpgradeMessage = computed(() => ui(EXPORT_UPGRADE_BODY));
+
 function onDisableCallbackConfirm() {
   paymentEngineSettingsState.exceptionCallbackEnabled = false;
   disableCallbackShell.popupOpen.value = false;
+}
+
+function closeExportPopup() {
+  exportShell.popupOpen.value = false;
 }
 
 function closeGoogleVerify() {
@@ -111,6 +137,36 @@ function closeGoogleVerify() {
       @confirm="onDisableCallbackConfirm"
       @cancel="disableCallbackShell.popupOpen.value = false"
     />
+  </EgPopup>
+
+  <EgPopup
+    v-if="exportShell.popupMounted.value"
+    v-model:open="exportShell.popupOpen.value"
+    uses="dialog"
+    dialog-type="symbol"
+    @close="exportShell.onPopupClosed"
+  >
+    <div :class="styles.exportDialogHost">
+      <div :class="styles.systemBarClose">
+        <EgIconButton
+          shape="square"
+          size="md"
+          :label="ui('Close')"
+          motion="asym"
+          @click="closeExportPopup"
+        >
+          <EgIcon name="eds-close-circle-fill" fit />
+        </EgIconButton>
+      </div>
+      <EgDialog
+        type="symbol"
+        :title="ui('Transaction Record Full Upgraded')"
+        :secondary-text="exportUpgradeMessage"
+        :confirm-label="ui('Try New Version')"
+        :cancel-label="ui('Export Old Version')"
+        toolbar-tone="decor"
+      />
+    </div>
   </EgPopup>
 
   <EgPopup

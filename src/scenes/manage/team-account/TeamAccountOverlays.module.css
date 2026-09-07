@@ -260,17 +260,6 @@
   width: 100%;
 }
 
-.networkGlyph {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--spacing-4);
-  height: var(--spacing-4);
-  border-radius: var(--radius-xs);
-  background: var(--material-card-shallow);
-  color: var(--text-brand-primary);
-}
-
 .rechargeBody {
   display: flex;
   flex-direction: column;
@@ -340,12 +329,11 @@
 .rechargeAddr {
   margin: 0;
   width: 100%;
-  max-width: calc(var(--spacing-8) * 8);
   color: var(--text-base-primary);
   font-size: var(--eds-body-small-size);
   font-weight: var(--eds-body-small-strong-weight);
   line-height: var(--eds-body-small-strong-line-height);
-  word-break: break-all;
+  white-space: nowrap;
   text-align: center;
 }
 

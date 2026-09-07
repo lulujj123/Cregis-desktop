@@ -14,9 +14,8 @@ import { formatGroupedNumber } from '@/utils/formatGroupedDisplay';
 import {
   CALLBACK_RECORDS,
   EXCEPTION_RECORDS,
-  ORDER_PAGINER_STATS,
   ORDER_RECORDS,
-  SETTLEMENT_PAGINER_STATS,
+  PAYMENT_ENGINE_PAGINER_STATS,
   SETTLEMENT_RECORDS,
   type OrderRecordRow,
   type PaymentEngineListKind,
@@ -43,6 +42,7 @@ export const paymentEngineState = reactive({
   activeOrderId: '',
   activeSettlementId: '',
   listRemountKey: 0,
+  exportOpen: false,
 });
 
 const appliedFilterByKind = reactive<Record<PaymentEngineListKind, ReturnType<typeof defaultPaymentEngineFilterRows>>>({
@@ -189,13 +189,8 @@ export function usePaymentEnginePage(kind: () => PaymentEngineListKind) {
 
   const statisticsItems = computed(() => {
     const current = kind();
-    const source =
-      current === 'Order Record'
-        ? ORDER_PAGINER_STATS
-        : current === 'Settlement Record' || current === 'Payment Exception Record'
-          ? SETTLEMENT_PAGINER_STATS
-          : [];
-    return source.map((item) => ({
+    if (current === 'Callback Record') return [];
+    return PAYMENT_ENGINE_PAGINER_STATS.map((item) => ({
       text: ui(item.text),
       number: formatGroupedNumber(item.number),
     }));
@@ -210,7 +205,7 @@ export function usePaymentEnginePage(kind: () => PaymentEngineListKind) {
 
   const tabLabels = computed(() => {
     if (paymentEngineState.detailKind !== 'order' || !activeOrder.value) return [];
-    return orderTabLabels(activeOrder.value.detailVariant, ui);
+    return orderTabLabels(activeOrder.value, ui);
   });
 
   const detailSections = computed((): DetailSectionData[] => {
@@ -218,13 +213,13 @@ export function usePaymentEnginePage(kind: () => PaymentEngineListKind) {
       return settlementDetailSections(activeSettlement.value, ui);
     }
     if (activeOrder.value) {
-      return orderDetailSections(activeOrder.value.detailVariant, activeTab.value, ui);
+      return orderDetailSections(activeOrder.value, activeTab.value, ui);
     }
     return [];
   });
 
   const detailEyebrow = computed(() => {
-    if (paymentEngineState.detailKind === 'settlement') return '';
+    if (paymentEngineState.detailKind === 'settlement') return ui('Settlement Detail');
     return ui('Order Amount');
   });
   const detailHeadline = computed(() => {
