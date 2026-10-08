@@ -11,11 +11,16 @@ import SigningFlowHost from '@/scenes/tasks/signing/SigningFlowHost.vue';
 import { signingFlowRegistry } from '@/scenes/tasks/signing/signingFlowContext';
 import TeamAccountFlowHost from '@/scenes/manage/team-account/TeamAccountFlowHost.vue';
 import PaymentEngineFlowHost from '@/scenes/payment-engine/PaymentEngineFlowHost.vue';
+import TransactionRecordDetailFlowHost from '@/scenes/transaction-records/TransactionRecordDetailFlowHost.vue';
+import { transactionRecordDetailFlowRegistry } from '@/scenes/transaction-records/transactionRecordDetailFlowContext';
 
 const approvalFlow = computed(() => approvalFlowRegistry.value);
 const signingFlow = computed(() => signingFlowRegistry.value);
 const signingBatchFlow = computed(() => signingBatchFlowRegistry.value);
 const recordDetailFlow = computed(() => recordDetailFlowRegistry.value);
+const transactionRecordDetailFlow = computed(
+  () => transactionRecordDetailFlowRegistry.value,
+);
 </script>
 
 <template>
@@ -24,6 +29,10 @@ const recordDetailFlow = computed(() => recordDetailFlowRegistry.value);
       <ApprovalFlowHost v-if="approvalFlow" :flow="approvalFlow" />
       <SigningFlowHost v-if="signingFlow" :flow="signingFlow" />
       <RecordDetailFlowHost v-if="recordDetailFlow" :flow="recordDetailFlow" />
+      <TransactionRecordDetailFlowHost
+        v-if="transactionRecordDetailFlow"
+        :flow="transactionRecordDetailFlow"
+      />
       <SigningBatchFlowHost v-if="signingBatchFlow" :flow="signingBatchFlow" />
       <SigningBatchGlobalProgressHost />
       <TeamAccountFlowHost />

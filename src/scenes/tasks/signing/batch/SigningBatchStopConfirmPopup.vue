@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { toRef } from 'vue';
-import { EgPopup, EgReminder } from '@eds/desktop-components';
+import { EgDialog, EgPopup } from '@eds/desktop-components';
 import { useAppI18n } from '@/composables/useAppI18n';
 import { usePopupShellLifecycle } from '../../shared/usePopupShellLifecycle';
 
@@ -42,7 +42,7 @@ function onCancel() {
     dialog-type="compose"
     @close="onPopupClosed"
   >
-    <EgReminder
+    <EgDialog
       type="compose"
       :title="ui('Stop Signing')"
       :show-secondary-text="false"
@@ -59,6 +59,6 @@ function onCancel() {
           )
         }}
       </p>
-    </EgReminder>
+    </EgDialog>
   </EgPopup>
 </template>

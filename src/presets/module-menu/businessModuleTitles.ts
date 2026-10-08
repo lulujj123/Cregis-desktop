@@ -62,6 +62,66 @@ export function resolveNavChromeLabelToModuleMenuTitle(
   return null;
 }
 
+/** Nav modules + app entries (English keys) — used for click matching before reverse i18n. */
+const CREGIS_NAV_BAR_LABEL_KEYS = [
+  'Wallet',
+  'Tasks',
+  'WaaS',
+  'Payment Engine',
+  'Report',
+  'Risk Control',
+  'Manage',
+  'Marketplace',
+  'UniChain',
+  'MetaMask',
+  'Notice',
+  'User avatar',
+] as const;
+
+export type NavBarClickState = {
+  /** Module Menu / 主内容路由用英文 key。 */
+  navLabel: string;
+  moduleTitle: CregisModuleMenuBusinessTitle | null;
+};
+
+/**
+ * Nav 模块点击：用 preset 英文 key 正向匹配，避免「交易记录」等重复译文
+ * 被 resolveEnglishUiText 误解析为 Notifications 的 Transactions。
+ */
+export function resolveNavBarClickState(
+  ariaLabel: string,
+  translate: (key: string) => string,
+): NavBarClickState | null {
+  const trimmed = ariaLabel.trim();
+  if (!trimmed) return null;
+
+  const chromeMapped = NAV_CHROME_LABEL_TO_MODULE_TITLE[trimmed];
+  if (chromeMapped) {
+    return { navLabel: chromeMapped, moduleTitle: chromeMapped };
+  }
+
+  for (const key of CREGIS_NAV_BAR_LABEL_KEYS) {
+    if (trimmed !== key && trimmed !== translate(key)) continue;
+
+    const chromeTitle = NAV_CHROME_LABEL_TO_MODULE_TITLE[key];
+    if (chromeTitle) {
+      return { navLabel: chromeTitle, moduleTitle: chromeTitle };
+    }
+
+    const moduleTitle = (cregisModuleMenuBusinessTitles as readonly string[]).includes(key)
+      ? (key as CregisModuleMenuBusinessTitle)
+      : null;
+    return { navLabel: key, moduleTitle };
+  }
+
+  const moduleTitle = resolveNavChromeLabelToModuleMenuTitle(trimmed);
+  if (moduleTitle) {
+    return { navLabel: moduleTitle, moduleTitle };
+  }
+
+  return null;
+}
+
 export function navLabelShouldHideModuleMenu(label: string): boolean {
   return (cregisNavLabelsWithoutModuleMenu as readonly string[]).includes(label.trim());
 }

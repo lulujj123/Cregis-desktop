@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, toRef } from 'vue';
-import { EgButton, EgPopup, EgReminder } from '@eds/desktop-components';
+import { EgButton, EgDialog, EgPopup } from '@eds/desktop-components';
 import { useAppI18n } from '@/composables/useAppI18n';
 import { formatGroupedDecimalAmount } from '@/utils/formatGroupedDisplay';
 import { usePopupShellLifecycle } from '../../shared/usePopupShellLifecycle';
@@ -62,7 +62,7 @@ function onContinueSending() {
     alert-vertical-align="offset-top"
     @close="onPopupClosed"
   >
-    <EgReminder
+    <EgDialog
       :class="styles.host"
       type="compose"
       :title="ui('Withdrawal quota exceeded')"
@@ -91,6 +91,6 @@ function onContinueSending() {
           </div>
         </div>
       </template>
-    </EgReminder>
+    </EgDialog>
   </EgPopup>
 </template>

@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue';
 import {
   EgAnchoredPopover,
   EgIcon,
-  EgTooltip,
+  EgTooltipPanel,
 } from '@eds/desktop-components';
 import styles from './ShellDebugLauncherAnchored.module.css';
 import {
@@ -113,7 +113,7 @@ onMounted(() => {
         data-eds-trigger-metrics
         :class="styles.triggerMetrics"
       >
-        <EgTooltip
+        <EgTooltipPanel
           :class="styles.launcherShell"
           panel-kind="popup"
           panel-radius="radius-full"
@@ -133,7 +133,7 @@ onMounted(() => {
             </span>
             <span :class="styles.launcherLabel">{{ label }}</span>
           </button>
-        </EgTooltip>
+        </EgTooltipPanel>
       </span>
     </template>
 

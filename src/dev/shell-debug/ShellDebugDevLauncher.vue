@@ -3,7 +3,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import {
   EgAnchoredPopover,
   EgIcon,
-  EgTooltip,
+  EgTooltipPanel,
 } from '@eds/desktop-components';
 import InspectDetailPanel from './inspect/InspectDetailPanel.vue';
 import {
@@ -224,7 +224,7 @@ onBeforeUnmount(() => {
             developerInspectActive && styles.triggerMetricsDevActive,
           ]"
         >
-          <EgTooltip
+          <EgTooltipPanel
             :class="styles.launcherShell"
             panel-kind="popup"
             panel-radius="radius-full"
@@ -248,7 +248,7 @@ onBeforeUnmount(() => {
               </span>
               <span :class="styles.launcherLabel">Dev</span>
             </button>
-          </EgTooltip>
+          </EgTooltipPanel>
         </span>
       </template>
 

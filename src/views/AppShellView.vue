@@ -8,12 +8,11 @@ import TeamAccountPage from '@/scenes/manage/team-account/TeamAccountPage.vue';
 import {
   DEFAULT_CREGIS_MODULE_MENU_BUSINESS_TITLE,
   navLabelShouldHideModuleMenu,
-  resolveNavChromeLabelToModuleMenuTitle,
+  resolveNavBarClickState,
   type CregisModuleMenuBusinessTitle,
 } from '@/presets/module-menu/businessModuleTitles';
 import { getCregisModuleMenuGroups } from '@/presets/module-menu/cregisModuleMenuGroups';
 import { cregisNavBarDeclarativeAttrs } from '@/presets/nav/cregisNavBarDeclarative';
-import { resolveEnglishUiText } from '@/i18n/translateUiText';
 import PaymentEnginePage from '@/scenes/payment-engine/PaymentEnginePage.vue';
 import {
   DEFAULT_PAYMENT_ENGINE_MENU_ITEM,
@@ -27,8 +26,9 @@ import {
   isTasksDataListMenuItem,
   type TasksDataListMenuItemLabel,
 } from '@/scenes/tasks/tasksDataListPageData';
+import TransactionRecordsDataListPage from '@/scenes/transaction-records/TransactionRecordsDataListPage.vue';
 
-const { messages, ui, locale } = useAppI18n();
+const { messages, ui } = useAppI18n();
 
 const navBarAttrs = computed(() => ({
   ...cregisNavBarDeclarativeAttrs,
@@ -76,6 +76,9 @@ const showPaymentEnginePage = computed(
     isPaymentEngineMenuItem(activeModuleMenuItem.value),
 );
 
+/** Report has no module menu — open transaction records directly. */
+const showReportPage = computed(() => activeModuleTitle.value === 'Report');
+
 const tasksModuleMenuGroups = useTasksModuleMenuGroups();
 
 const moduleMenuGroups = computed(() => {
@@ -102,6 +105,10 @@ watch(activeModuleTitle, (title) => {
     activeModuleMenuItem.value = DEFAULT_PAYMENT_ENGINE_MENU_ITEM;
     return;
   }
+  if (title === 'Report') {
+    activeModuleMenuItem.value = null;
+    return;
+  }
   activeModuleMenuItem.value = null;
 }, { immediate: true });
 
@@ -118,11 +125,13 @@ function onNavClick(event: MouseEvent) {
   if (!button?.closest('.eds-nav-bar')) return;
 
   const label = button.getAttribute('aria-label') ?? '';
-  const englishLabel = resolveEnglishUiText(locale.value, label);
-  if (englishLabel.trim()) activeNavLabel.value = englishLabel;
+  const navState = resolveNavBarClickState(label, ui);
+  if (!navState) return;
 
-  const title = resolveNavChromeLabelToModuleMenuTitle(englishLabel);
-  if (title) activeModuleTitle.value = title;
+  activeNavLabel.value = navState.navLabel;
+  if (navState.moduleTitle) {
+    activeModuleTitle.value = navState.moduleTitle;
+  }
 }
 
 function onModuleMenuItemSelect(label: string) {
@@ -180,6 +189,7 @@ function onModuleMenuItemSelect(label: string) {
       :key="activeModuleMenuItem"
       :menu-item="activeModuleMenuItem"
     />
+    <TransactionRecordsDataListPage v-else-if="showReportPage" />
     <div v-else class="app-shell-main">
       <p class="app-shell-main__hint">{{ messages.appShellMainHint }}</p>
     </div>

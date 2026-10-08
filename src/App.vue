@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { EgContainer, EgTooltip } from '@eds/desktop-components';
+import { EgContainer, EgTooltipPanel } from '@eds/desktop-components';
 import { RouterView } from 'vue-router';
 import AppPreviewResizeHandles from '@/app-preview/AppPreviewResizeHandles.vue';
 import AppPopupOverlayHost from '@/components/AppPopupOverlayHost.vue';
@@ -7,7 +7,7 @@ import MultiSignInvitationFloatHost from '@/scenes/tasks/signing/multiSignInvita
 </script>
 
 <template>
-  <EgTooltip
+  <EgTooltipPanel
     panel-kind="container"
     panel-radius="radius-lg"
     :scrollable="true"
@@ -19,5 +19,5 @@ import MultiSignInvitationFloatHost from '@/scenes/tasks/signing/multiSignInvita
     <AppPopupOverlayHost />
     <MultiSignInvitationFloatHost />
     <AppPreviewResizeHandles />
-  </EgTooltip>
+  </EgTooltipPanel>
 </template>

@@ -25,9 +25,9 @@ const qaPanelTitle = computed(() => `${pageDisplayName.value} QA`);
     <div :class="styles.launcherColumn">
       <ShellDebugModelCapsule />
 
-      <ShellDebugDevLauncher />
-
       <ShellDebugWindowCapsule />
+
+      <ShellDebugDevLauncher />
 
       <ShellDebugLauncherAnchored
         label="QA"

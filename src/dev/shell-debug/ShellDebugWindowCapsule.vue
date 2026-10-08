@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue';
 import {
   EgAnchoredPopover,
   EgIcon,
-  EgTooltip,
+  EgTooltipPanel,
 } from '@eds/desktop-components';
 import {
   PREVIEW_WINDOW_MODE_ORDER,
@@ -88,7 +88,7 @@ onMounted(() => {
     >
       <template #trigger="{ active, onClick }">
         <span data-eds-trigger-metrics :class="styles.triggerMetrics">
-          <EgTooltip
+          <EgTooltipPanel
             :class="styles.launcherShell"
             panel-kind="popup"
             panel-radius="radius-full"
@@ -104,11 +104,11 @@ onMounted(() => {
               @click.stop.prevent="onTriggerClick($event, active, onClick)"
             >
               <span :class="styles.launcherIcon" aria-hidden="true">
-                <EgIcon name="eds-list-lattice-desktop" size="sm" />
+                <EgIcon name="eds-window-flex" size="sm" />
               </span>
               <span :class="styles.launcherLabel">Wnd.</span>
             </button>
-          </EgTooltip>
+          </EgTooltipPanel>
         </span>
       </template>
 

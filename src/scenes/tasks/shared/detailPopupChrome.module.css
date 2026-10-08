@@ -7,6 +7,35 @@
   min-height: 0;
 }
 
+.detailPageStack {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+}
+
+.detailPageStack > :global(.motion-page-stack) {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  align-content: start;
+}
+
+.detailPageStack > :global(.motion-page-stack) > :global(.motion-page) {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  background: var(--box-page);
+}
+
 .headlineFiat {
   color: var(--text-base-secondary);
   font-size: var(--eds-body-small-size);
@@ -45,8 +74,13 @@
 }
 
 /* 交易信息分区与 append 第二分区衔接：去掉 sections 底 padding，由 append 顶 padding 承接 sections gap-4。 */
-.detailHost :global(.eds-detail [class*='sections']) {
+.detailHost:not(.detailHostScrollBottomPad) :global(.eds-detail [class*='sections']) {
   padding-bottom: 0;
+}
+
+/* Report 等无 append/底栏 Detail：正文底部至少 spacing-6（24px）。 */
+.detailHostScrollBottomPad :global(.eds-detail [class*='sections']) {
+  padding-bottom: var(--spacing-6);
 }
 
 /*
