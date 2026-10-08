@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import {
-  EgAnchoredTooltip,
+  EgTooltip,
   EgButton,
   EgIcon,
   EgIconButton,
@@ -42,7 +42,7 @@ function onConfirm() {
 </script>
 
 <template>
-  <EgAnchoredTooltip
+  <EgTooltip
     ref="anchorRef"
     placement="bottom"
     align="center"
@@ -105,5 +105,5 @@ function onConfirm() {
         </div>
       </EgPopover>
     </template>
-  </EgAnchoredTooltip>
+  </EgTooltip>
 </template>

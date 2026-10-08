@@ -2,5 +2,6 @@
 @import '../../../eds-desktop/packages/components/src/styles/global.css';
 @import '../../../eds-desktop/packages/components/src/styles/interactionHoverTooltip.css';
 @import '../../../eds-desktop/packages/components/src/styles/motionPageTransition.css';
-@import '../../../eds-desktop/packages/components/src/styles/motionLayoutDeformTransition.css';
+/* Vendored: pin eds SHA has no motionLayoutDeformTransition.css yet. */
+@import './motionLayoutDeformTransition.css';
 @import './list-field-typography.css';

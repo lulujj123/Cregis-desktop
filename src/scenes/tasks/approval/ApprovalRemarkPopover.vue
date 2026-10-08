@@ -2,7 +2,7 @@
 import { computed, nextTick, ref } from 'vue';
 import {
   EgAnchoredPopover,
-  EgAnchoredTooltip,
+  EgTooltip,
   EgPopover,
   POPOVER_PRESET_WIDTH_BASE,
   REMARK_POPOVER_MAX_LENGTH,
@@ -133,7 +133,7 @@ function onMinerFeePopoverDismiss() {
 </script>
 
 <template>
-  <EgAnchoredTooltip
+  <EgTooltip
     v-if="hasMinerFeeStep"
     ref="minerFeeAnchoredRef"
     placement="top"
@@ -202,7 +202,7 @@ function onMinerFeePopoverDismiss() {
         />
       </EgPopover>
     </template>
-  </EgAnchoredTooltip>
+  </EgTooltip>
 
   <EgAnchoredPopover
     v-else

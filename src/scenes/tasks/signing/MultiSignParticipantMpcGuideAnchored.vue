@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import {
-  EgAnchoredTooltip,
+  EgTooltip,
   EgButton,
   EgPopover,
   POPOVER_PRESET_WIDTH_GUIDE,
@@ -83,7 +83,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <EgAnchoredTooltip
+  <EgTooltip
     ref="anchoredRef"
     placement="top"
     align="center"
@@ -134,5 +134,5 @@ onBeforeUnmount(() => {
         </EgPopover>
       </div>
     </template>
-  </EgAnchoredTooltip>
+  </EgTooltip>
 </template>

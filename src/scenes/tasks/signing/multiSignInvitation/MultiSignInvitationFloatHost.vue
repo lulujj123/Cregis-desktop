@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import {
-  EgAnchoredTooltip,
+  EgTooltip,
+  EgTooltipPanel,
   EgIcon,
   EgToast,
-  EgTooltip,
   closeAllAnchoredTooltips,
 } from '@eds/desktop-components';
 import { useAppI18n } from '@/composables/useAppI18n';
@@ -31,7 +31,7 @@ const anchoredRef = ref<{
   close?: () => void;
 } | null>(null);
 
-/** 与 EgAnchoredTooltip @open/@close 同步；开/关唯一业务态。 */
+/** 与 EgTooltip @open/@close 同步；开/关唯一业务态。 */
 const panelExpanded = ref(false);
 
 const toastText = ref('');
@@ -41,7 +41,7 @@ const toastMotionActive = ref(false);
 let toastTimer: ReturnType<typeof setTimeout> | undefined;
 let toastLeaveTimer: ReturnType<typeof setTimeout> | undefined;
 
-/** 离开待签名后再进入时递增，强制 remount EgAnchoredTooltip（配合 v-if 清 teleport 残留）。 */
+/** 离开待签名后再进入时递增，强制 remount EgTooltip（配合 v-if 清 teleport 残留）。 */
 const floatMountGeneration = ref(0);
 let floatHadBeenHidden = false;
 
@@ -289,7 +289,7 @@ onBeforeUnmount(() => {
     data-app-client-float-host
   >
     <div :class="styles.floatAnchor" data-float-interactive>
-      <EgAnchoredTooltip
+      <EgTooltip
         :key="floatMountGeneration"
         ref="anchoredRef"
         placement="top"
@@ -312,7 +312,7 @@ onBeforeUnmount(() => {
           :class="styles.floatBadgeMetrics"
           @click.stop.prevent="onBadgeClick"
         >
-          <EgTooltip
+          <EgTooltipPanel
             :class="styles.floatBadge"
             panel-kind="popup"
             panel-radius="radius-full"
@@ -334,7 +334,7 @@ onBeforeUnmount(() => {
                 {{ triggerLabelParts.before }}<span :class="styles.floatBadgeCount">{{ triggerLabelParts.count }}</span>{{ triggerLabelParts.after }}
               </span>
             </button>
-          </EgTooltip>
+          </EgTooltipPanel>
         </span>
 
         <template #content>
@@ -344,7 +344,7 @@ onBeforeUnmount(() => {
             @close="dismissPanel"
           />
         </template>
-      </EgAnchoredTooltip>
+      </EgTooltip>
     </div>
 
     <div
