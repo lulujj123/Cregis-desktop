@@ -129,7 +129,34 @@ function resolveTransactionDirection(transactionType: string): TransactionRecord
 }
 
 function formatTransactionDirectionLabel(direction: TransactionRecordDirection): string {
-  return direction === 'in' ? '转入' : '转出';
+  // 收支类型列：简中／繁中均为「收入」「支出」（非「转入／转出」）。
+  return direction === 'in' ? '收入' : '支出';
+}
+
+/**
+ * View by Address：收支类型以已选搜索地址为视角。
+ * - 选中地址为收款方 → 收入
+ * - 选中地址为付款方 → 支出
+ * 未传视角地址时沿用行上的 directionLabel（按交易类型）。
+ */
+export function resolveDirectionLabelForPerspectiveAddress(
+  row: TransactionRecordRow,
+  perspectiveAddress?: string,
+): string {
+  const selected = perspectiveAddress?.trim().toLowerCase() ?? '';
+  if (!selected) {
+    return row.directionLabel;
+  }
+
+  const fromMatch = row.fromAddress.toLowerCase() === selected;
+  const toMatch = row.toAddress.toLowerCase() === selected;
+  if (toMatch && !fromMatch) {
+    return '收入';
+  }
+  if (fromMatch && !toMatch) {
+    return '支出';
+  }
+  return row.directionLabel;
 }
 
 function formatDemoTimestamp(offsetMs: number): string {

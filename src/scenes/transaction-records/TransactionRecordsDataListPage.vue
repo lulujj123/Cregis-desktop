@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch, type CSSProperties } from 'vue';
 import {
   EgDataList,
   EgDataListCellOverflow,
@@ -81,7 +81,12 @@ import { registerTransactionRecordsDataListShellApi } from './transactionRecords
 import {
   TRANSACTION_RECORDS_DEMO_TOTAL,
   buildTransactionRecordRow,
+  resolveDirectionLabelForPerspectiveAddress,
 } from './transactionRecordData';
+import {
+  buildTransactionRecordAddressSuggestions,
+  type TransactionRecordAddressSuggestion,
+} from './buildTransactionRecordAddressSuggestions';
 import { useTransactionRecordDetailFlow } from './useTransactionRecordDetailFlow';
 import styles from './TransactionRecordsDataListPage.module.css';
 
@@ -89,6 +94,11 @@ const { ui } = useAppI18n();
 
 const selected = ref(0);
 const value = ref('');
+/** View by Address: list stays empty until user picks a suggestion. */
+const committedAddress = ref('');
+const addressInputFocused = ref(false);
+const addressInputWrapRef = ref<HTMLElement | null>(null);
+const addressSuggestPanelStyle = ref<CSSProperties>({});
 const transactionTimeTimezone = ref<TransactionRecordsTimezoneOffset>(
   TRANSACTION_RECORDS_DEFAULT_TIMEZONE,
 );
@@ -148,19 +158,19 @@ const filterFields = computed((): EgFilterField[] =>
 
 const filteredIndices = computed(() => {
   const allIndices = Array.from({ length: TRANSACTION_RECORDS_DEMO_TOTAL }, (_, index) => index);
-  const addressQuery = value.value.trim().toLowerCase();
+  const committed = committedAddress.value.trim().toLowerCase();
 
-  // View by Address: address is mandatory — show nothing until one is entered.
+  // View by Address: empty until a suggestion is selected (not while only typing).
   let addressScopedIndices = allIndices;
   if (isSpecificAddressMode.value) {
-    if (!addressQuery) {
+    if (!committed) {
       addressScopedIndices = [];
     } else {
       addressScopedIndices = allIndices.filter((rowIndex) => {
         const row = buildTransactionRecordRow(rowIndex);
         return (
-          row.fromAddress.toLowerCase().includes(addressQuery)
-          || row.toAddress.toLowerCase().includes(addressQuery)
+          row.fromAddress.toLowerCase() === committed
+          || row.toAddress.toLowerCase() === committed
         );
       });
     }
@@ -175,8 +185,13 @@ const filteredIndices = computed(() => {
 
     nextIndices = addressScopedIndices.filter((rowIndex) => {
       try {
+        const row = buildTransactionRecordRow(rowIndex);
         return applyEgFilterConditions({
-          snapshot: buildTransactionRecordsFilterRowSnapshot(buildTransactionRecordRow(rowIndex)),
+          snapshot: buildTransactionRecordsFilterRowSnapshot(row, {
+            perspectiveAddress: isSpecificAddressMode.value
+              ? committedAddress.value
+              : undefined,
+          }),
           conditions,
           fields,
           logicMode,
@@ -312,15 +327,25 @@ onMounted(() => {
       console.warn(`[transaction-records QA] ${message}`);
     },
   });
+  window.addEventListener('resize', updateAddressSuggestPanelPosition);
 });
 
 onBeforeUnmount(() => {
   registerTransactionRecordDetailFlow(null);
   registerTransactionRecordsDataListShellApi(null);
+  window.removeEventListener('resize', updateAddressSuggestPanelPosition);
 });
 
 function recordRow(data: DataListItem): TransactionRecordRow {
   return data as TransactionRecordRow;
+}
+
+/** View by Address：收支类型以搜索地址为视角；钱包视图沿用行默认标签。 */
+function directionLabelForRow(row: TransactionRecordRow): string {
+  return resolveDirectionLabelForPerspectiveAddress(
+    row,
+    isSpecificAddressMode.value ? committedAddress.value : undefined,
+  );
 }
 
 function onRowClick(data: DataListItem) {
@@ -346,6 +371,101 @@ function onExportConfirm(payload: {
 }) {
   void payload;
 }
+
+const addressSuggestions = computed(() => {
+  if (!isSpecificAddressMode.value) return [];
+  return buildTransactionRecordAddressSuggestions(value.value);
+});
+
+const showAddressSuggestions = computed(() => {
+  if (!isSpecificAddressMode.value || !addressInputFocused.value) return false;
+  const query = value.value.trim();
+  if (!query) return false;
+  const list = addressSuggestions.value;
+  if (list.length === 0) return false;
+  if (
+    list.length === 1
+    && list[0]!.address.toLowerCase() === query.toLowerCase()
+  ) {
+    return false;
+  }
+  return true;
+});
+
+function updateAddressSuggestPanelPosition() {
+  const wrap = addressInputWrapRef.value;
+  const preview = document.querySelector('.app-preview') as HTMLElement | null;
+  if (!wrap || !preview) return;
+
+  const wrapRect = wrap.getBoundingClientRect();
+  const previewRect = preview.getBoundingClientRect();
+  if (wrapRect.width <= 0 || wrapRect.height <= 0) return;
+
+  const styles = getComputedStyle(wrap);
+  const gapPx = Number.parseFloat(styles.getPropertyValue('--spacing-025').trim()) || 2;
+  const scale40 = Number.parseFloat(styles.getPropertyValue('--scale-40').trim()) || 160;
+  // Wider than the input so full addresses read more comfortably (~1.5× / scale-40×3).
+  const panelWidth = Math.round(Math.max(wrapRect.width * 1.5, scale40 * 3));
+
+  addressSuggestPanelStyle.value = {
+    position: 'absolute',
+    top: `${Math.round(wrapRect.bottom - previewRect.top + gapPx)}px`,
+    left: `${Math.round(wrapRect.left - previewRect.left)}px`,
+    width: `${panelWidth}px`,
+    zIndex: 1100,
+  };
+}
+
+function onAddressInputFocusIn() {
+  addressInputFocused.value = true;
+  void nextTick(() => updateAddressSuggestPanelPosition());
+}
+
+function onAddressInputFocusOut() {
+  // Delay so mousedown on a teleported suggestion can run before focus leaves.
+  window.setTimeout(() => {
+    addressInputFocused.value = false;
+  }, 120);
+}
+
+function resolveAddressSuggestionLabel(item: TransactionRecordAddressSuggestion): string {
+  return item.alias.trim() || ui('Unnamed Address');
+}
+
+function onSelectAddressSuggestion(item: TransactionRecordAddressSuggestion) {
+  committedAddress.value = item.address;
+  value.value = item.address;
+  addressInputFocused.value = false;
+}
+
+watch(value, (next) => {
+  const wrap = addressInputWrapRef.value;
+  if (wrap && wrap.contains(document.activeElement)) {
+    addressInputFocused.value = true;
+  }
+  // Editing away from the committed suggestion clears list results.
+  if (next.trim() !== committedAddress.value.trim()) {
+    committedAddress.value = '';
+  }
+});
+
+watch(
+  [showAddressSuggestions, addressSuggestions, value],
+  async () => {
+    if (!showAddressSuggestions.value) return;
+    await nextTick();
+    updateAddressSuggestPanelPosition();
+    requestAnimationFrame(() => updateAddressSuggestPanelPosition());
+  },
+);
+
+watch(isSpecificAddressMode, (on) => {
+  if (!on) {
+    addressInputFocused.value = false;
+    committedAddress.value = '';
+    value.value = '';
+  }
+});
 </script>
 
 <template>
@@ -366,15 +486,47 @@ function onExportConfirm(payload: {
               />
               <div
                 v-if="isSpecificAddressMode"
+                ref="addressInputWrapRef"
                 :class="styles.addressInputWrap"
+                @focusin="onAddressInputFocusIn"
+                @focusout="onAddressInputFocusOut"
               >
                 <EgInput
                   v-model="value"
                   size="sm"
                   width-mode="full"
+                  :overflow-feedback="false"
                   :placeholder="ui('Input Address')"
                 />
               </div>
+              <Teleport to=".app-preview">
+                <div
+                  v-if="showAddressSuggestions"
+                  :class="[styles.addressSuggestPanel, 'desktopTokens']"
+                  data-no-corner-smoothing
+                  role="listbox"
+                  :style="addressSuggestPanelStyle"
+                >
+                  <button
+                    v-for="item in addressSuggestions"
+                    :key="item.address"
+                    type="button"
+                    :class="styles.addressSuggestItem"
+                    role="option"
+                    @mousedown.prevent="onSelectAddressSuggestion(item)"
+                  >
+                    <span :class="styles.addressSuggestAlias">
+                      <EgListFieldOverflowText
+                        :text="resolveAddressSuggestionLabel(item)"
+                        size="medium"
+                      />
+                    </span>
+                    <span :class="styles.addressSuggestAddress">
+                      <EgListFieldOverflowText :text="item.address" />
+                    </span>
+                  </button>
+                </div>
+              </Teleport>
             </span>
           </template>
           <template #functional>
@@ -484,7 +636,11 @@ function onExportConfirm(payload: {
                       :content-class="pageStyles.comboHeaderSegmentText"
                       context="header"
                     >
-                      {{ ui('Address') }}
+                      {{
+                        isSpecificAddressMode
+                          ? ui('Interaction Address')
+                          : ui('Address')
+                      }}
                     </EgDataListCellOverflow>
                   </div>
                 </div>
@@ -495,6 +651,9 @@ function onExportConfirm(payload: {
                 <TasksListFieldCurrency
                   :customize="buildReportCurrencyCustomize(recordRow(data), {
                     enableMultiTxAddressCount: isWalletView,
+                    hideSelectedAddress: isSpecificAddressMode
+                      ? committedAddress
+                      : undefined,
                   })"
                 />
               </div>
@@ -518,8 +677,10 @@ function onExportConfirm(payload: {
             </template>
           </EgDataListColumn>
 
+          <!-- 用 hidden 替代 v-if，避免 DataList 列槽错绑导致钱包视图丢失「收支类型」。 -->
           <EgDataListColumn
-            v-if="isWalletView"
+            key="affiliated-wallet"
+            :hidden="!isWalletView"
             prop="walletName"
             :label="ui('Affiliated Wallet')"
             :min-width="TRANSACTION_RECORD_WALLET_COLUMN_MIN_WIDTH"
@@ -561,7 +722,7 @@ function onExportConfirm(payload: {
           >
             <template #default="{ data }">
               <EgListFieldOverflowText
-                :text="recordRow(data).directionLabel"
+                :text="directionLabelForRow(recordRow(data))"
                 variant="primary"
                 tooltip-trigger="hover"
               />

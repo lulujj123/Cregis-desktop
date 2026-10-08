@@ -17,13 +17,16 @@
 
 .dataListNest :deep(.eds-tool-bar) {
   flex-shrink: 0;
+  /* Allow address typeahead to extend below the toolbar chrome. */
+  overflow: visible;
 }
 
-/* Let title + address input yield width before toolbar actions overflow. */
+/* Let title + address input yield width before toolbar actions overflow.
+ * overflow visible so View by Address typeahead can paint below the field. */
 .dataListNest :deep(.eds-tool-bar-title) {
   flex: 1 1 auto;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .dataListNest :deep(.eds-tool-bar-title p) {
@@ -31,6 +34,7 @@
   align-items: center;
   min-width: 0;
   max-width: 100%;
+  overflow: visible;
 }
 
 .toolbarTitleWithSegmented {
@@ -61,6 +65,67 @@
 .addressInputWrap :global(.eds-input) {
   width: 100%;
   max-width: 100%;
+}
+
+/* Teleported under .app-preview; top/left/width set inline from the input wrap.
+ * Opaque menu fill (not effect-flotation-box glass @ 60%). */
+.addressSuggestPanel {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-025);
+  max-height: calc(var(--scale-40) * 2);
+  padding: var(--spacing-1);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: none;
+  border-radius: var(--radius-md);
+  border: var(--stroke-xs) solid var(--material-same-white-quaternary);
+  background: var(--box-menu);
+  box-shadow: var(--eds-shadow-light);
+}
+
+.addressSuggestItem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-05);
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: var(--spacing-2) var(--spacing-3);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--motion-transition-hover);
+}
+
+.addressSuggestItem:hover {
+  background: var(--event-hover);
+}
+
+.addressSuggestAlias,
+.addressSuggestAddress {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.addressSuggestAlias {
+  color: var(--text-base-primary);
+  font-size: var(--eds-body-medium-size);
+  font-weight: var(--eds-body-medium-weight);
+  line-height: var(--eds-body-medium-line-height);
+}
+
+.addressSuggestAddress {
+  color: var(--text-base-secondary);
+  font-size: var(--eds-body-small-size);
+  font-weight: var(--eds-body-small-weight);
+  line-height: var(--eds-body-small-line-height);
 }
 
 .dataListNest :deep(.eds-paginer) {

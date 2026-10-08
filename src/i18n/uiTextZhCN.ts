@@ -568,6 +568,7 @@ export const UI_TEXT_ZH_CN: Record<string, string> = {
   Inactive: '停用',
   Input: '请输入',
   'Input Address': '特定目标地址(必填)',
+  'Unnamed Address': '未命名的地址',
   Automatic: '自动',
   Income: '收入',
   Expense: '支出',

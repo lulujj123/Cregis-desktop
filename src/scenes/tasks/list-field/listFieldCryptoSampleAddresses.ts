@@ -94,7 +94,14 @@ const VERIFIED_ADDRESS_BASES: Record<CryptoAddressFamily, readonly string[]> = {
     '0x8894E0a0c962CB723c1976a4421c95941bE7D7955',
   ],
   zec: ['t1WnKbfp7s8Sy5TXoHCPsHyaAc94oyxQLd9', 't1g722FZ7XH5mdUoQ1YNMPZ9YfqXJKnQfK'],
-  btc: ['bc1qmakjy7ns2z8vwgptf9vs8fndp304fg0p9xafm2', 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh'],
+  btc: [
+    'bc1qmakjy7ns2z8vwgptf9vs8fndp304fg0p9xafm2',
+    'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+    // P2SH demo addresses (View by Address typeahead partial match on "3")
+    '3FxjX4ew2CA7YS7EvWNyjvDrQauFnxSf9F',
+    '32n9WZvsyMcLM6kkLfibf39o9fNhP4GUbg',
+    '3DuXjJty9EyGHNnWvPJaXMsQSiTKmu5nXa',
+  ],
   trx: ['TLa2f6VPqDgRE67v1736s7bJ8nyEwRS9WB', 'TWd4WrZ9wn84f5x1hZhL4DHvk738ns5jR8'],
   sol: ['9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM', '7EcDhSYGxXyscsz7oxWLzbDy5zvHshFv5ECjNjA9yLx'],
   xrp: ['rDsbeomae4FXwgQTJp9BkLLBn2GXQkEiB3'],

@@ -28,7 +28,11 @@ export function buildReportTimeCustomize(
 /** Showcase list-field-currency · 币种图标 + 网络 Tag + 双地址（交易记录自有组合）。 */
 export function buildReportCurrencyCustomize(
   row: TransactionRecordRow,
-  options: { enableMultiTxAddressCount?: boolean } = {},
+  options: {
+    enableMultiTxAddressCount?: boolean;
+    /** View by Address：不展示已选搜索地址，只留交互对方地址。 */
+    hideSelectedAddress?: string;
+  } = {},
 ): Record<string, unknown> {
   const multiTx =
     Boolean(options.enableMultiTxAddressCount)
@@ -36,6 +40,22 @@ export function buildReportCurrencyCustomize(
   const toAddressCount = multiTx
     ? String(parseTransactionRecordCount(row))
     : '1';
+
+  const hide = options.hideSelectedAddress?.trim().toLowerCase() ?? '';
+  let fromSideVisible = true;
+  let toSideVisible = true;
+  if (hide) {
+    const fromMatch = row.fromAddress.toLowerCase() === hide;
+    const toMatch = row.toAddress.toLowerCase() === hide;
+    if (fromMatch && !toMatch) {
+      fromSideVisible = false;
+    } else if (toMatch && !fromMatch) {
+      toSideVisible = false;
+    } else if (fromMatch && toMatch) {
+      // Same address both sides — keep a single from line.
+      toSideVisible = false;
+    }
+  }
 
   return {
     symbol: row.symbol,
@@ -49,8 +69,8 @@ export function buildReportCurrencyCustomize(
     fromAddressCount: '1',
     toAddress1: row.toAddress,
     toAddressCount,
-    fromSideVisible: true,
-    toSideVisible: true,
+    fromSideVisible,
+    toSideVisible,
     addressTooltipTrigger: 'hover',
   };
 }
