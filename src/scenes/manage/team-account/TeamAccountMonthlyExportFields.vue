@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import {
   EgComboInputItem,
   EgFlotation,
@@ -38,6 +38,9 @@ const periodYears = computed(() => listMonthlyExportYears());
 
 const selectedPeriod = computed(() => parseMonthlyExportPeriodLabel(period.value));
 
+/** Align with EgFilter currency cascade: one hover-open submenu at a time. */
+const activeCascadeYear = ref<number | null>(null);
+
 const langMenuItems = computed(() =>
   props.languageItems.map((item) => ({
     ...item,
@@ -63,6 +66,20 @@ function isMonthSelected(year: number, monthIndex: number) {
   );
 }
 
+function onYearRowEnter(year: number) {
+  activeCascadeYear.value = year;
+}
+
+function isYearCascadeDisabled(year: number) {
+  return activeCascadeYear.value !== null && activeCascadeYear.value !== year;
+}
+
+function onYearCascadeClose(year: number) {
+  if (activeCascadeYear.value === year) {
+    activeCascadeYear.value = null;
+  }
+}
+
 function onPeriodMonthClick(
   year: number,
   monthIndex: number,
@@ -72,6 +89,7 @@ function onPeriodMonthClick(
   period.value = formatMonthlyExportPeriodLabel(year, monthIndex);
   closeMonths();
   closeYears();
+  activeCascadeYear.value = null;
 }
 
 function onLanguageClick(item: FlotationMenuItemPreset) {
@@ -124,19 +142,22 @@ function onHeaderClick(next: StatementHeader, close: () => void) {
               v-for="year in periodYears"
               :key="year"
               :class="styles.yearRowWrap"
+              @mouseenter="onYearRowEnter(year)"
             >
               <EgFlotation
                 :class="styles.yearFlotation"
                 placement="right"
                 align="start"
-                trigger="click"
+                trigger="hover"
                 width-mode="fixed"
                 :width="MONTH_MENU_WIDTH"
                 :show-add="false"
                 :show-menu-divider="false"
+                :disabled="isYearCascadeDisabled(year)"
                 boundary-selector=".app-preview"
                 flip
                 close-on-scroll
+                @close="onYearCascadeClose(year)"
               >
                 <template #trigger="{ expanded }">
                   <div :class="styles.yearRow" data-eds-trigger-metrics>
