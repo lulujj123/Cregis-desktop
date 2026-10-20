@@ -247,6 +247,7 @@ defineExpose({
       :disabled="disabled"
       teleport-to=".app-preview"
       boundary-selector=".app-preview"
+      :close-on-scroll="false"
       @open="onOpen"
       @close="onClose"
     >

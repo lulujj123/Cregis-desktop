@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
- * Statement period picker — same interaction as EgFilter currency (FilterConditionCurrencyValue):
- * year list + hover-open month submenu (separate layer), menu width hugs content.
+ * Statement period picker — EgFilter currency cascade (FilterConditionCurrencyValue):
+ * year list + hover month submenu (separate teleported layer), width hugs content.
  */
 import { computed, ref } from 'vue';
 import {
@@ -19,6 +19,9 @@ import {
 import styles from './TeamAccountMonthlyExportPeriodPicker.module.css';
 
 const CASCADE_BOUNDARY_SELECTOR = '.app-preview';
+/** Bridge gap between year row (inside export panel) and teleported month menu. */
+const CASCADE_HOVER_CLOSE_DELAY_MS = 80;
+const MONTH_CASCADE_MENU_WIDTH = 140;
 
 const period = defineModel<string>({ required: true });
 
@@ -45,6 +48,10 @@ function onCascadeRowEnter(year: number) {
   activeCascadeYear.value = String(year);
 }
 
+function onCascadeOpen(year: number) {
+  activeCascadeYear.value = String(year);
+}
+
 function isCascadeFlotationDisabled(year: number) {
   const key = String(year);
   return activeCascadeYear.value !== null && activeCascadeYear.value !== key;
@@ -56,6 +63,11 @@ function onCascadeFlotationClose(year: number) {
   }
 }
 
+function isCascadeRowHighlighted(year: number, expanded: boolean) {
+  const key = String(year);
+  return expanded || activeCascadeYear.value === key || isYearSelected(year);
+}
+
 function onMonthClick(year: number, monthIndex: number, closeRoot: () => void) {
   period.value = formatMonthlyExportPeriodLabel(year, monthIndex);
   activeCascadeYear.value = null;
@@ -64,7 +76,7 @@ function onMonthClick(year: number, monthIndex: number, closeRoot: () => void) {
 </script>
 
 <template>
-  <div :class="styles.root">
+  <div :class="styles.root" @pointerdown.stop>
     <EgFlotation
       trigger="click"
       width-mode="trigger"
@@ -104,23 +116,26 @@ function onMonthClick(year: number, monthIndex: number, closeRoot: () => void) {
             >
               <EgFlotation
                 :class="styles.cascadeFlotation"
-                placement="right"
+                placement="left"
                 align="start"
                 trigger="hover"
-                width-mode="adaptive"
+                width-mode="fixed"
+                :width="MONTH_CASCADE_MENU_WIDTH"
                 :show-add="false"
                 :show-menu-divider="false"
                 :disabled="isCascadeFlotationDisabled(year)"
                 :boundary-selector="CASCADE_BOUNDARY_SELECTOR"
+                :close-delay="CASCADE_HOVER_CLOSE_DELAY_MS"
                 flip
                 :close-on-scroll="false"
+                @open="onCascadeOpen(year)"
                 @close="onCascadeFlotationClose(year)"
               >
-                <template #trigger>
+                <template #trigger="{ expanded: yearExpanded }">
                   <div
                     :class="[
                       styles.cascadeRow,
-                      isYearSelected(year) && styles.cascadeRowSelected,
+                      isCascadeRowHighlighted(year, yearExpanded) && styles.cascadeRowSelected,
                     ]"
                     data-eds-trigger-metrics
                   >
@@ -130,17 +145,18 @@ function onMonthClick(year: number, monthIndex: number, closeRoot: () => void) {
                       :label="String(year)"
                       :show-tag="false"
                       show-cascader
-                      :focused="isYearSelected(year)"
+                      :focused="isCascadeRowHighlighted(year, yearExpanded)"
                     />
                   </div>
                 </template>
-                <template #content="{ close: closeMonths }">
+                <template #content>
                   <EgFlotationMenu
                     :class="['desktopTokens', styles.submenu]"
                     data-no-corner-smoothing
                     panel-flush
                     panel-radius="radius-md"
-                    width-mode="adaptive"
+                    width-mode="fixed"
+                    :width="MONTH_CASCADE_MENU_WIDTH"
                     height-mode="adaptive"
                     :max-height="280"
                     list-scroll
