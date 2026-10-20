@@ -22,6 +22,11 @@
   background: var(--material-same-white-primary);
 }
 
+/* Statement period cascade is inline (no teleport); avoid clipping the year/month menu. */
+.panel:has([data-export-period-inline-menu]) {
+  overflow: visible;
+}
+
 :global(.desktopTokens.effect-flotation-box:has([data-export-flotation-panel])),
 :global(html[data-theme='light'] .desktopTokens.effect-flotation-box:has([data-export-flotation-panel])),
 :global(html[data-theme='dark'] .desktopTokens.effect-flotation-box:has([data-export-flotation-panel])) {
