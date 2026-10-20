@@ -38,58 +38,37 @@
   min-width: 100%;
 }
 
-.optionList {
+.cascadeColumns {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  box-sizing: border-box;
+  margin: var(--spacing-1);
+  gap: 0;
+  min-width: max-content;
+}
+
+.yearColumn {
   display: flex;
   flex-direction: column;
   gap: 1px;
-  box-sizing: border-box;
-  margin: var(--spacing-1);
+  flex: 0 0 auto;
+  min-width: max-content;
+  padding-right: 1px;
+  border-right: 1px solid var(--stroke-base-subtle);
 }
 
-.optionRowWrap {
+.monthColumn {
   display: flex;
-  align-self: stretch;
-  width: 100%;
-  min-width: 0;
-}
-
-.optionRowWrap > :global(*) {
-  flex: 1 1 auto;
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-}
-
-.cascadeFlotation:global(.eds-flotation) {
-  display: flex !important;
   flex-direction: column;
-  align-self: stretch;
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
+  gap: 1px;
+  flex: 0 0 auto;
+  min-width: max-content;
+  padding-left: var(--spacing-1);
 }
 
-.cascadeFlotation > :global(span) {
+.yearRow {
   display: flex;
-  flex: 1 1 auto;
-  align-self: stretch;
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-}
-
-.cascadeFlotation :global(.trigger) {
-  display: flex !important;
-  flex: 1 1 auto;
-  align-self: stretch;
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-}
-
-.cascadeRow {
-  display: flex;
-  flex: 1 1 auto;
   align-self: stretch;
   width: 100%;
   min-width: 0;
@@ -97,20 +76,15 @@
   border-radius: var(--radius-sm);
 }
 
-.cascadeRowSelected,
-.cascadeRow:has(:global(.eds-flotation-menu-item[aria-pressed='true'])) {
+.yearRowActive,
+.yearRow:has(:global(.eds-flotation-menu-item[aria-pressed='true'])) {
   background-color: var(--event-focus-brand-weaken);
 }
 
-.submenu:global(.desktopTokens.effect-flotation-box) {
-  width: max-content;
-  min-width: 0;
-}
-
-.cascadeList {
+.yearRow :global(.eds-flotation-menu-item) {
   display: flex;
-  flex-direction: column;
-  gap: 1px;
-  box-sizing: border-box;
-  margin: var(--spacing-1);
+  flex: 1 1 auto;
+  align-self: stretch;
+  width: 100%;
+  min-width: 0;
 }

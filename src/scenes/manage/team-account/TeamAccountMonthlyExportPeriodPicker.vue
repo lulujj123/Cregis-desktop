@@ -1,9 +1,10 @@
 <script setup lang="ts">
 /**
- * Statement period picker — EgFilter currency cascade (FilterConditionCurrencyValue):
- * year list + hover month submenu (separate teleported layer), width hugs content.
+ * Period picker inside Generate Monthly Statement export tooltip.
+ * Uses one EgFlotation + side-by-side year/month columns on hover (no nested hover
+ * teleports — those fail across Safari/Chrome inside click EgTooltip panels).
  */
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import {
   EgFlotation,
   EgFlotationMenu,
@@ -19,20 +20,25 @@ import {
 import styles from './TeamAccountMonthlyExportPeriodPicker.module.css';
 
 const CASCADE_BOUNDARY_SELECTOR = '.app-preview';
-/** Bridge gap between year row (inside export panel) and teleported month menu. */
-const CASCADE_HOVER_CLOSE_DELAY_MS = 80;
-const MONTH_CASCADE_MENU_WIDTH = 140;
 
 const period = defineModel<string>({ required: true });
 
 const periodYears = computed(() => listMonthlyExportYears());
 const selectedPeriod = computed(() => parseMonthlyExportPeriodLabel(period.value));
 
-const activeCascadeYear = ref<string | null>(null);
+const hoverYear = ref<number | null>(null);
 
-function monthsForYear(year: number) {
+const activeYear = computed(() => {
+  if (hoverYear.value != null) return hoverYear.value;
+  if (selectedPeriod.value?.year != null) return selectedPeriod.value.year;
+  return periodYears.value[0] ?? null;
+});
+
+const monthsForActiveYear = computed(() => {
+  const year = activeYear.value;
+  if (year == null) return [];
   return listMonthlyExportMonthOptions(year);
-}
+});
 
 function isYearSelected(year: number) {
   return selectedPeriod.value?.year === year;
@@ -44,35 +50,32 @@ function isMonthSelected(year: number, monthIndex: number) {
   );
 }
 
-function onCascadeRowEnter(year: number) {
-  activeCascadeYear.value = String(year);
+function onYearPointerEnter(year: number) {
+  hoverYear.value = year;
 }
 
-function onCascadeOpen(year: number) {
-  activeCascadeYear.value = String(year);
+function onPickerOpen() {
+  hoverYear.value = selectedPeriod.value?.year ?? periodYears.value[0] ?? null;
 }
 
-function isCascadeFlotationDisabled(year: number) {
-  const key = String(year);
-  return activeCascadeYear.value !== null && activeCascadeYear.value !== key;
-}
-
-function onCascadeFlotationClose(year: number) {
-  if (activeCascadeYear.value === String(year)) {
-    activeCascadeYear.value = null;
-  }
-}
-
-function isCascadeRowHighlighted(year: number, expanded: boolean) {
-  const key = String(year);
-  return expanded || activeCascadeYear.value === key || isYearSelected(year);
+function onPickerClose() {
+  hoverYear.value = null;
 }
 
 function onMonthClick(year: number, monthIndex: number, closeRoot: () => void) {
   period.value = formatMonthlyExportPeriodLabel(year, monthIndex);
-  activeCascadeYear.value = null;
+  hoverYear.value = null;
   closeRoot();
 }
+
+watch(
+  () => period.value,
+  () => {
+    if (hoverYear.value == null && selectedPeriod.value?.year != null) {
+      hoverYear.value = selectedPeriod.value.year;
+    }
+  },
+);
 </script>
 
 <template>
@@ -85,6 +88,8 @@ function onMonthClick(year: number, monthIndex: number, closeRoot: () => void) {
       :boundary-selector="CASCADE_BOUNDARY_SELECTOR"
       flip
       :close-on-scroll="false"
+      @open="onPickerOpen"
+      @close="onPickerClose"
     >
       <template #trigger="{ expanded }">
         <EgFlotationTrigger
@@ -103,81 +108,48 @@ function onMonthClick(year: number, monthIndex: number, closeRoot: () => void) {
           panel-radius="radius-md"
           width-mode="adaptive"
           height-mode="adaptive"
-          :scrollable="false"
+          :max-height="280"
+          list-scroll
+          :scrollable="true"
           :show-add="false"
           :show-divider="false"
         >
-          <div :class="styles.optionList">
-            <div
-              v-for="year in periodYears"
-              :key="year"
-              :class="styles.optionRowWrap"
-              @mouseenter="onCascadeRowEnter(year)"
-            >
-              <EgFlotation
-                :class="styles.cascadeFlotation"
-                placement="left"
-                align="start"
-                trigger="hover"
-                width-mode="fixed"
-                :width="MONTH_CASCADE_MENU_WIDTH"
-                :show-add="false"
-                :show-menu-divider="false"
-                :disabled="isCascadeFlotationDisabled(year)"
-                :boundary-selector="CASCADE_BOUNDARY_SELECTOR"
-                :close-delay="CASCADE_HOVER_CLOSE_DELAY_MS"
-                flip
-                :close-on-scroll="false"
-                @open="onCascadeOpen(year)"
-                @close="onCascadeFlotationClose(year)"
+          <div :class="styles.cascadeColumns">
+            <div :class="styles.yearColumn">
+              <div
+                v-for="year in periodYears"
+                :key="year"
+                :class="[
+                  styles.yearRow,
+                  activeYear === year && styles.yearRowActive,
+                ]"
+                @mouseenter="onYearPointerEnter(year)"
+                @pointerenter="onYearPointerEnter(year)"
               >
-                <template #trigger="{ expanded: yearExpanded }">
-                  <div
-                    :class="[
-                      styles.cascadeRow,
-                      isCascadeRowHighlighted(year, yearExpanded) && styles.cascadeRowSelected,
-                    ]"
-                    data-eds-trigger-metrics
-                  >
-                    <EgFlotationMenuItem
-                      host-tag="div"
-                      box-type="text"
-                      :label="String(year)"
-                      :show-tag="false"
-                      show-cascader
-                      :focused="isCascadeRowHighlighted(year, yearExpanded)"
-                    />
-                  </div>
-                </template>
-                <template #content>
-                  <EgFlotationMenu
-                    :class="['desktopTokens', styles.submenu]"
-                    data-no-corner-smoothing
-                    panel-flush
-                    panel-radius="radius-md"
-                    width-mode="fixed"
-                    :width="MONTH_CASCADE_MENU_WIDTH"
-                    height-mode="adaptive"
-                    :max-height="280"
-                    list-scroll
-                    :scrollable="true"
-                    :show-add="false"
-                    :show-divider="false"
-                  >
-                    <div :class="styles.cascadeList">
-                      <EgFlotationMenuItem
-                        v-for="month in monthsForYear(year)"
-                        :key="`${year}-${month.monthIndex}`"
-                        box-type="text"
-                        :label="month.shortLabel"
-                        :show-tag="false"
-                        :focused="isMonthSelected(year, month.monthIndex)"
-                        @click="onMonthClick(year, month.monthIndex, close)"
-                      />
-                    </div>
-                  </EgFlotationMenu>
-                </template>
-              </EgFlotation>
+                <EgFlotationMenuItem
+                  host-tag="div"
+                  box-type="text"
+                  :label="String(year)"
+                  :show-tag="false"
+                  show-cascader
+                  :focused="activeYear === year || isYearSelected(year)"
+                />
+              </div>
+            </div>
+            <div
+              v-if="activeYear != null"
+              :class="styles.monthColumn"
+              aria-hidden="false"
+            >
+              <EgFlotationMenuItem
+                v-for="month in monthsForActiveYear"
+                :key="`${activeYear}-${month.monthIndex}`"
+                box-type="text"
+                :label="month.shortLabel"
+                :show-tag="false"
+                :focused="isMonthSelected(activeYear, month.monthIndex)"
+                @click="onMonthClick(activeYear, month.monthIndex, close)"
+              />
             </div>
           </div>
         </EgFlotationMenu>
