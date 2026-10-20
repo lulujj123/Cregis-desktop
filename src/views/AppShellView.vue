@@ -69,6 +69,9 @@ import {
   isManageModuleMenuItem,
 } from '@/scenes/manage/manageMenuData';
 import { useManageModuleMenuGroups } from '@/scenes/manage/useManageModuleMenuGroups';
+import { dismissTeamAccountOverlays } from '@/scenes/manage/team-account/useTeamAccountPage';
+
+const TEAM_ACCOUNT_BALANCE_MENU_ITEM = 'Team Account Balance';
 
 const { messages, ui, locale } = useAppI18n();
 const { state: shellNavState } = useAppShellNavigation();
@@ -248,7 +251,7 @@ watch(activeModuleTitle, (title) => {
     return;
   }
   if (title === 'Manage') {
-    activeModuleMenuItem.value = 'Team Account Balance';
+    activeModuleMenuItem.value = DEFAULT_MANAGE_MENU_ITEM;
     return;
   }
   if (title === 'WaaS') {
@@ -264,10 +267,6 @@ watch(activeModuleTitle, (title) => {
     activeModuleMenuItem.value = DEFAULT_RISK_CONTROL_MENU_ITEM;
     return;
   }
-  if (title === 'Manage') {
-    activeModuleMenuItem.value = DEFAULT_MANAGE_MENU_ITEM;
-    return;
-  }
   if (title === 'Report') {
     activeModuleMenuItem.value = null;
     return;
@@ -281,6 +280,22 @@ watch(
     setMultiSignCollaborationModuleActive(title === 'Tasks');
   },
   { immediate: true },
+);
+
+watch(activeModuleMenuItem, (item) => {
+  if (item !== TEAM_ACCOUNT_BALANCE_MENU_ITEM) {
+    dismissTeamAccountOverlays();
+  }
+});
+
+watch(
+  [activeModuleTitle, activeModuleMenuItem],
+  async () => {
+    const item = activeModuleMenuItem.value;
+    if (!item || !showModuleMenu.value) return;
+    await nextTick();
+    syncModuleMenuItemFocus(translateModuleMenu(item));
+  },
 );
 
 watch(waasSelectedProject, (project, previousProject) => {
@@ -373,7 +388,9 @@ function onModuleMenuItemSelect(label: string) {
   }
 
   if (activeModuleTitle.value === 'Manage') {
-    activeModuleMenuItem.value = label;
+    if (isManageModuleMenuItem(label)) {
+      activeModuleMenuItem.value = label;
+    }
     return;
   }
 
@@ -389,13 +406,6 @@ function onModuleMenuItemSelect(label: string) {
 
   if (activeModuleTitle.value === 'Risk Control') {
     if (isRiskControlModuleMenuItem(label)) {
-      activeModuleMenuItem.value = label;
-    }
-    return;
-  }
-
-  if (activeModuleTitle.value === 'Manage') {
-    if (isManageModuleMenuItem(label)) {
       activeModuleMenuItem.value = label;
     }
   }
@@ -430,19 +440,6 @@ function findNavBarButton(navLabel: string): HTMLButtonElement | null {
   return null;
 }
 
-function syncModuleMenuItemFocus(menuItem: string) {
-  const translated = ui(menuItem);
-  for (const button of document.querySelectorAll<HTMLButtonElement>(
-    'button.eds-module-menu-item',
-  )) {
-    const text = button.textContent?.trim() ?? '';
-    if (text !== menuItem && text !== translated) continue;
-    if (button.getAttribute('aria-pressed') === 'true') return;
-    button.click();
-    return;
-  }
-}
-
 watch(
   () => shellNavState.requestId,
   async () => {
@@ -472,7 +469,7 @@ watch(
       pendingShellMenuItem = null;
     }
     await nextTick();
-    syncModuleMenuItemFocus(target.menuItem);
+    syncModuleMenuItemFocus(translateModuleMenu(target.menuItem));
   },
 );
 </script>

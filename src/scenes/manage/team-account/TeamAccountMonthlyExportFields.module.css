@@ -24,61 +24,8 @@
   box-sizing: border-box;
 }
 
-.periodMenu,
-.monthMenu,
 .headerMenu {
   min-width: 0;
-}
-
-.yearRowWrap {
-  display: flex;
-  align-self: stretch;
-  width: 100%;
-  min-width: 0;
-}
-
-.yearRowWrap > :global(*) {
-  flex: 1 1 auto;
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-}
-
-.yearFlotation:global(.eds-flotation) {
-  display: flex;
-  flex-direction: column;
-  align-self: stretch;
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-}
-
-.yearFlotation > :global(span) {
-  display: flex;
-  flex: 1 1 auto;
-  align-self: stretch;
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-}
-
-.yearRow {
-  display: flex;
-  flex: 1 1 auto;
-  align-self: stretch;
-  width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-}
-
-.yearRow :global(.eds-flotation-menu-item) {
-  display: flex;
-  flex: 1 1 auto;
-  align-self: stretch;
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  box-sizing: border-box;
 }
 
 .headerCopy {

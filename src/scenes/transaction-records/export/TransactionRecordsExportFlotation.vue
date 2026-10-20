@@ -229,6 +229,10 @@ function onHistoryDownload(_id: string) {
 onBeforeUnmount(() => {
   clearHistoryReadyTimer();
 });
+
+defineExpose({
+  closePanel,
+});
 </script>
 
 <template>

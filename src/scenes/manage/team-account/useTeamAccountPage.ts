@@ -59,6 +59,16 @@ function memberFlagMap(isOn: (id: string) => boolean): Record<string, boolean> {
   return Object.fromEntries(ALERT_MEMBERS.map((member) => [member.id, isOn(member.id)]));
 }
 
+/** Close team-account EgPopups when leaving Manage → Team Account Balance. */
+export function dismissTeamAccountOverlays() {
+  teamAccountState.rechargeOpen = false;
+  teamAccountState.alertOpen = false;
+  teamAccountState.billSettingOpen = false;
+  teamAccountState.sendOpen = false;
+  teamAccountState.statementOpen = false;
+  teamAccountState.txDetailOpen = false;
+}
+
 export const teamAccountState = reactive({
   billYear: 2026,
   billsExpanded: false,

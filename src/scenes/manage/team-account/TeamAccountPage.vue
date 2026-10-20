@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import {
   EgButton,
   EgDataList,
@@ -36,7 +36,7 @@ import {
 } from './teamAccountData';
 import { TEAM_ACCOUNT_FILTER_OPERATORS } from './teamAccountFilter';
 import { useScrollChromeScrim } from '@/scenes/tasks/shared/useScrollChromeScrim';
-import { useTeamAccountPage } from './useTeamAccountPage';
+import { dismissTeamAccountOverlays, useTeamAccountPage } from './useTeamAccountPage';
 import styles from './TeamAccountPage.module.css';
 
 const DATA_LIST_COLUMN_HEIGHT = 48;
@@ -86,6 +86,7 @@ const hasActiveTxFilters = computed(() =>
 );
 
 const monthlyExportPeriod = ref(DEFAULT_MONTHLY_EXPORT_PERIOD_LABEL);
+const monthlyStatementExportRef = ref<{ closePanel: () => void } | null>(null);
 
 const monthlyExportHistory = computed(() =>
   TEAM_ACCOUNT_MONTHLY_EXPORT_HISTORY_SEED.map((item) => ({
@@ -119,6 +120,11 @@ function refreshTxListScrollChrome() {
 }
 
 onMounted(refreshTxListScrollChrome);
+
+onBeforeUnmount(() => {
+  monthlyStatementExportRef.value?.closePanel();
+  dismissTeamAccountOverlays();
+});
 
 watch([pagedTx, currentPage, txDataList], refreshTxListScrollChrome);
 
@@ -176,6 +182,7 @@ function resolveMonthlyHistoryEntry() {
           <EgIcon name="eds-notice" size="sm" />
         </EgIconButtonPro>
         <TransactionRecordsExportFlotation
+          ref="monthlyStatementExportRef"
           key="monthly-statement-export"
           :panel-title="ui('Generate Monthly Statement')"
           :show-scope="false"

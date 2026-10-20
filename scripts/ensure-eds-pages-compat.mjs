@@ -99,6 +99,13 @@ export { default as EgSegmentedControl } from './Segmented.vue';
 `,
   },
   {
+    file: resolve(componentsSrc, 'molecules/crypto-combo/index.ts'),
+    needle: 'EgCryptoAddressTags',
+    append: `
+export { default as EgCryptoAddressTags } from './CryptoAddressTags.vue';
+`,
+  },
+  {
     file: resolve(componentsSrc, 'molecules/combo/index.ts'),
     needle: 'EgComboActionFlotation',
     append: `
