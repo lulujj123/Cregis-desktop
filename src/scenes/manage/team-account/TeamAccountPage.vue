@@ -26,7 +26,13 @@ import {
 import TransactionRecordsExportFlotation from '@/scenes/transaction-records/export/TransactionRecordsExportFlotation.vue';
 import { TRANSACTION_RECORDS_EXPORT_HISTORY_OPERATOR_DEMO } from '@/scenes/transaction-records/export/transactionRecordsExportData';
 import { formatGroupedNumber } from '@/utils/formatGroupedDisplay';
+import TasksListFieldTime from '@/scenes/tasks/list-field/TasksListFieldTime.vue';
 import TeamAccountDisplayTimezoneControl from './TeamAccountDisplayTimezoneControl.vue';
+import {
+  TEAM_ACCOUNT_TIME_COLUMN_MIN_WIDTH,
+  TEAM_ACCOUNT_TIME_COLUMN_WIDTH,
+} from './teamAccountColumnLayout';
+import { buildTeamAccountTimeCustomize } from './teamAccountListFieldCustomize';
 import TeamAccountMonthlyExportFields from './TeamAccountMonthlyExportFields.vue';
 import {
   DEFAULT_MONTHLY_EXPORT_PERIOD_LABEL,
@@ -322,8 +328,8 @@ function resolveMonthlyHistoryEntry() {
                 <EgDataListColumn
                   prop="time"
                   :label="ui('Time')"
-                  min-width="160px"
-                  width="160px"
+                  :min-width="TEAM_ACCOUNT_TIME_COLUMN_MIN_WIDTH"
+                  :width="TEAM_ACCOUNT_TIME_COLUMN_WIDTH"
                   :sortable="false"
                 >
                   <template #header>
@@ -346,10 +352,8 @@ function resolveMonthlyHistoryEntry() {
                     </div>
                   </template>
                   <template #default="{ data }">
-                    <EgListFieldOverflowText
-                      :text="String(data.time)"
-                      size="small"
-                      boundary-selector=".app-preview"
+                    <TasksListFieldTime
+                      :customize="buildTeamAccountTimeCustomize(String(data.time ?? ''))"
                     />
                   </template>
                 </EgDataListColumn>

@@ -83,7 +83,7 @@ export type StmtLine = { d: string; type: string | null; inn: number | null; out
 
 
 export const OP_SAM = 'Sam (Sa*****@cregis.io)';
-export const DEMO_TIME = '2031-12-23  10:23:00';
+export const DEMO_TIME = '2031-12-23 10:23:00';
 export const DEMO_HASH = '60bfe69ce24d82dd7795722130666a4cfa34f1308120cfffdcb2a70bf295ba39';
 export const DEMO_ORDER = 'ORD-20311223-8821';
 export const RECHARGE_ADDR = 'TCogAdKNMyU2P4HA4aiuj7ZqyZPzE2Hx2r';
@@ -183,25 +183,25 @@ const BALANCE_TX_SEED: BalanceTx[] = [
   { id: 't2', type: 'System Recharge', dir: 'in', amount: '+$20,000.00', time: DEMO_TIME, operator: 'System' },
   { id: 't2b', type: 'System Refund', dir: 'in', amount: '+$20,000.00', time: DEMO_TIME, operator: 'System' },
   { id: 't3', type: 'Team Subscription Upgrade', dir: 'out', amount: '-$20,000.00', time: DEMO_TIME, operator: OP_SAM, plan: 'Pro → Enterprise', orderNo: DEMO_ORDER },
-  { id: 't4', type: 'Team Subscription Renewal', dir: 'out', amount: '-$1,299.00', time: '2027-07-01  00:00:00', operator: 'System', plan: 'Enterprise · Annual', orderNo: 'SUB-20270701' },
-  { id: 't5', type: 'Benefits Renewal', dir: 'out', amount: '-$480.00', time: '2027-06-01  00:00:00', operator: 'System', plan: 'AML Pack · 12 months', orderNo: 'BNF-20270601' },
-  { id: 't6', type: 'Benefits Upgrade', dir: 'out', amount: '-$2,400.00', time: '2027-05-18  09:11:02', operator: OP_SAM, plan: 'Standard → Premium', orderNo: 'BNF-20270518' },
-  { id: 't7', type: 'Automation Feature Activation', dir: 'out', amount: '-$199.00', time: '2027-05-02  16:40:11', operator: OP_SAM, plan: 'Payment automation', orderNo: 'AUTO-20270502' },
-  { id: 't8', type: 'Benefits Expansion', dir: 'out', amount: '-$800.00', time: '2027-04-21  08:01:11', operator: OP_SAM, plan: 'Member seats ×50', orderNo: 'EXP-20270421' },
+  { id: 't4', type: 'Team Subscription Renewal', dir: 'out', amount: '-$1,299.00', time: '2027-07-01 00:00:00', operator: 'System', plan: 'Enterprise · Annual', orderNo: 'SUB-20270701' },
+  { id: 't5', type: 'Benefits Renewal', dir: 'out', amount: '-$480.00', time: '2027-06-01 00:00:00', operator: 'System', plan: 'AML Pack · 12 months', orderNo: 'BNF-20270601' },
+  { id: 't6', type: 'Benefits Upgrade', dir: 'out', amount: '-$2,400.00', time: '2027-05-18 09:11:02', operator: OP_SAM, plan: 'Standard → Premium', orderNo: 'BNF-20270518' },
+  { id: 't7', type: 'Automation Feature Activation', dir: 'out', amount: '-$199.00', time: '2027-05-02 16:40:11', operator: OP_SAM, plan: 'Payment automation', orderNo: 'AUTO-20270502' },
+  { id: 't8', type: 'Benefits Expansion', dir: 'out', amount: '-$800.00', time: '2027-04-21 08:01:11', operator: OP_SAM, plan: 'Member seats ×50', orderNo: 'EXP-20270421' },
   { id: 't9', type: 'Tron Activation Fee', dir: 'out', amount: '-$12.00', time: DEMO_TIME, operator: OP_SAM, orderNo: 'TRON-ACT-8821', txid: DEMO_HASH },
-  { id: 't10', type: 'Tron Energy Fee', dir: 'out', amount: '-$8.50', time: '2027-04-10  11:22:00', operator: OP_SAM, orderNo: 'TRON-ENG-4410', txid: 'a91b22aa0091c8ef7795722130666a4c' },
-  { id: 't11', type: 'Tron Bandwidth Fee', dir: 'out', amount: '-$3.20', time: '2027-04-09  10:08:17', operator: OP_SAM, orderNo: 'TRON-BW-4409', txid: 'c0de88f177acb12a009155bb1122aabb' },
-  { id: 't12', type: 'AML Manual Query', dir: 'out', amount: '-$12.00', time: '2027-06-14  11:40:18', operator: OP_SAM, provider: 'Chainalysis', orderNo: 'AML-889477D7' },
-  { id: 't12b', type: 'AML Auto Query', dir: 'out', amount: '-$6.00', time: '2027-06-13  09:12:00', operator: 'System', provider: 'Chainalysis', orderNo: 'AML-AUTO-7712' },
-  { id: 't12e', type: 'Acquiring Service Fee', dir: 'out', amount: '-$45.00', time: '2027-06-10  10:00:00', operator: 'System', plan: 'Acquiring settlement', batchTransferId: 'BATCH-TRF-20270610', orderNo: 'ACQ-20270610' },
+  { id: 't10', type: 'Tron Energy Fee', dir: 'out', amount: '-$8.50', time: '2027-04-10 11:22:00', operator: OP_SAM, orderNo: 'TRON-ENG-4410', txid: 'a91b22aa0091c8ef7795722130666a4c' },
+  { id: 't11', type: 'Tron Bandwidth Fee', dir: 'out', amount: '-$3.20', time: '2027-04-09 10:08:17', operator: OP_SAM, orderNo: 'TRON-BW-4409', txid: 'c0de88f177acb12a009155bb1122aabb' },
+  { id: 't12', type: 'AML Manual Query', dir: 'out', amount: '-$12.00', time: '2027-06-14 11:40:18', operator: OP_SAM, provider: 'Chainalysis', orderNo: 'AML-889477D7' },
+  { id: 't12b', type: 'AML Auto Query', dir: 'out', amount: '-$6.00', time: '2027-06-13 09:12:00', operator: 'System', provider: 'Chainalysis', orderNo: 'AML-AUTO-7712' },
+  { id: 't12e', type: 'Acquiring Service Fee', dir: 'out', amount: '-$45.00', time: '2027-06-10 10:00:00', operator: 'System', plan: 'Acquiring settlement', batchTransferId: 'BATCH-TRF-20270610', orderNo: 'ACQ-20270610' },
   { id: 't13', type: 'Card Issuance Fee', dir: 'out', amount: '-$20.00', time: DEMO_TIME, card: 'Visa ·•• 4421', orderNo: 'CARD-ISS-4421' },
-  { id: 't14', type: 'Card Transfer', dir: 'out', amount: '-$5.00', time: '2027-03-12  14:22:05', card: 'Visa ·•• 4421', orderNo: 'CARD-TRF-4421' },
-  { id: 't15', type: 'Card Replacement Fee', dir: 'out', amount: '-$15.00', time: '2027-03-01  09:15:02', card: 'Visa ·•• 8830', orderNo: 'CARD-REP-8830' },
+  { id: 't14', type: 'Card Transfer', dir: 'out', amount: '-$5.00', time: '2027-03-12 14:22:05', card: 'Visa ·•• 4421', orderNo: 'CARD-TRF-4421' },
+  { id: 't15', type: 'Card Replacement Fee', dir: 'out', amount: '-$15.00', time: '2027-03-01 09:15:02', card: 'Visa ·•• 8830', orderNo: 'CARD-REP-8830' },
   { id: 't16', type: 'Over-limit Service Fee', dir: 'out', amount: '-$20,000.00', time: DEMO_TIME, operator: OP_SAM, orderNo: 'FEE-146821903', txid: DEMO_HASH },
   { id: 't17', type: 'Token Listing Application Fee', dir: 'out', amount: '-$20,000.00', time: DEMO_TIME, operator: OP_SAM, orderNo: DEMO_ORDER, tokenSymbol: 'USDC', tokenNetwork: 'Bitcoin' },
   { id: 't18', type: 'Token Listing Rejection Refund', dir: 'in', amount: '+$20,000.00', time: DEMO_TIME, orderNo: DEMO_ORDER, tokenSymbol: 'USDC', tokenNetwork: 'Bitcoin' },
   { id: 't19', type: 'Custom Solution', dir: 'out', amount: '-$20,000.00', time: DEMO_TIME, plan: 'Pro → Enterprise', orderNo: 'CUS-20311223' },
-  { id: 't20', type: 'Custom Solution - Other', dir: 'out', amount: '-$9,800.00', time: '2027-02-18  12:30:00', plan: 'Customized solution', orderNo: 'CUS-OTH-20311223' },
+  { id: 't20', type: 'Custom Solution - Other', dir: 'out', amount: '-$9,800.00', time: '2027-02-18 12:30:00', plan: 'Customized solution', orderNo: 'CUS-OTH-20311223' },
 ];
 
 const TX_DEMO_TOTAL = 56;
@@ -219,7 +219,7 @@ function cloneDemoTx(base: BalanceTx, index: number): BalanceTx {
   const seq = BALANCE_TX_SEED.length + index + 1;
   const date = new Date(Date.UTC(2027, 1, 28));
   date.setUTCDate(date.getUTCDate() - (index + 1));
-  const time = `${date.getUTCFullYear()}-${pad2(date.getUTCMonth() + 1)}-${pad2(date.getUTCDate())}  ${pad2(8 + (index % 10))}:${pad2((index * 7) % 60)}:${pad2((index * 13) % 60)}`;
+  const time = `${date.getUTCFullYear()}-${pad2(date.getUTCMonth() + 1)}-${pad2(date.getUTCDate())} ${pad2(8 + (index % 10))}:${pad2((index * 7) % 60)}:${pad2((index * 13) % 60)}`;
   return {
     ...base,
     id: `t${seq}`,
