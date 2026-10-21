@@ -305,10 +305,7 @@ watch(waasSelectedProject, (project, previousProject) => {
   const nextMode = project.depositMode;
   const currentItem = activeModuleMenuItem.value;
 
-  if (
-    previousMode !== nextMode
-    || !isWaasMenuItemValidForProject(currentItem, project)
-  ) {
+  if (!isWaasMenuItemValidForProject(currentItem, project)) {
     activeModuleMenuItem.value = resolveDefaultWaasMenuItem(project);
   }
 });
@@ -445,6 +442,10 @@ watch(
   async () => {
     const target = shellNavState.target;
     if (!target) return;
+
+    if (target.waasProjectId) {
+      selectWaasProjectById(target.waasProjectId);
+    }
 
     const navLabel = target.navLabel ?? target.moduleTitle;
     pendingShellMenuItem = target.menuItem;

@@ -19,6 +19,7 @@ import chromeScrimStyles from '@eds/desktop-components/styles/popupChromeScrim.m
 import { useAppI18n } from '@/composables/useAppI18n';
 import { isChineseLocale } from '@/composables/useAppLocale';
 import { navigateAppShell } from '@/composables/useAppShellNavigation';
+import { WAAS_ORDER_MODE_DEMO_PROJECT_ID } from '@/scenes/project/waasProjectStore';
 import { usePopupShellLifecycle } from '@/scenes/tasks/shared/usePopupShellLifecycle';
 import { useScrollChromeScrim } from '@/scenes/tasks/shared/useScrollChromeScrim';
 import '@/styles/popup-inner-backdrop.css';
@@ -184,12 +185,12 @@ function onBillSettingConfirm() {
 }
 
 function onViewTransferRecordsClick() {
-  // Close detail (logical), then route shell to WaaS → Bulk Transfer Record.
   teamAccountState.txDetailOpen = false;
   navigateAppShell({
     moduleTitle: 'WaaS',
     menuItem: 'Bulk Transfer Record',
     navLabel: 'WaaS',
+    waasProjectId: WAAS_ORDER_MODE_DEMO_PROJECT_ID,
   });
 }
 

@@ -5,6 +5,8 @@ export type AppShellNavigationTarget = {
   moduleTitle: CregisModuleMenuBusinessTitle;
   menuItem: string;
   navLabel?: string;
+  /** WaaS 订单模式等项目切换（如 Team Account → Bulk Transfer Record）。 */
+  waasProjectId?: string;
 };
 
 const state = reactive<{
