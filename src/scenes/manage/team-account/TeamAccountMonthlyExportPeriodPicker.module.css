@@ -11,22 +11,20 @@
   max-width: 100%;
 }
 
-.dropdown:global(.desktopTokens.effect-flotation-box) {
+.menuDrop:global(.desktopTokens.effect-flotation-box) {
   position: absolute;
   top: calc(100% + var(--spacing-025));
   left: 0;
   z-index: 2;
   box-sizing: border-box;
-  min-width: 100%;
 }
 
-.menuAdaptive {
+.menuAdaptive:global(.desktopTokens.effect-flotation-box) {
   width: max-content;
-  min-width: 100%;
+  min-width: 0;
 }
 
-.menu {
-  box-sizing: border-box;
+.menu:global(.desktopTokens.effect-flotation-box) {
   display: flex;
   flex-direction: column;
   min-width: 0;

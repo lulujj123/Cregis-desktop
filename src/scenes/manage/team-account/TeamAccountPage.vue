@@ -171,6 +171,8 @@ function resolveMonthlyHistoryEntry() {
           <p :class="styles.heroAmount">{{ availableBalance }}</p>
           <EgButton
             size="sm"
+            tone="decor"
+            variant="solid"
             @click="state.rechargeOpen = true"
           >
             {{ ui('Recharge') }}
@@ -185,6 +187,8 @@ function resolveMonthlyHistoryEntry() {
           ref="monthlyStatementExportRef"
           key="monthly-statement-export"
           :panel-title="ui('Generate Monthly Statement')"
+          action-label-key="Generate"
+          history-title-key="Generation Record"
           :show-scope="false"
           :show-date-range="false"
           :initial-history="monthlyExportHistory"

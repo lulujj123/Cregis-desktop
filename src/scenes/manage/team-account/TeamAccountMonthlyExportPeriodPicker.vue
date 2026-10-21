@@ -1,8 +1,7 @@
 <script setup lang="ts">
 /**
  * Period picker for Generate Monthly Statement (inside export EgTooltip).
- * Inline menu — no EgFlotation teleport — so Chrome does not treat year/month
- * interaction as an outside click and close the statement panel.
+ * Single EgFlotationMenu (no outer card wrapper); inline so the statement panel stays open.
  */
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import {
@@ -113,60 +112,56 @@ watch(
       :expanded="menuOpen"
       @click.stop="toggleMenu"
     />
-    <div
+    <EgFlotationMenu
       v-if="menuOpen"
-      :class="['desktopTokens', 'effect-flotation-box', styles.dropdown, styles.menuAdaptive]"
+      :class="['desktopTokens', styles.menu, styles.menuDrop, styles.menuAdaptive]"
       data-export-period-inline-menu
       data-no-corner-smoothing
+      panel-flush
+      panel-radius="radius-md"
+      width-mode="adaptive"
+      height-mode="adaptive"
+      :max-height="280"
+      list-scroll
+      :scrollable="true"
+      :show-add="false"
+      :show-divider="false"
       @pointerdown.stop
     >
-      <EgFlotationMenu
-        :class="styles.menu"
-        panel-flush
-        panel-radius="radius-md"
-        width-mode="adaptive"
-        height-mode="adaptive"
-        :max-height="280"
-        list-scroll
-        :scrollable="true"
-        :show-add="false"
-        :show-divider="false"
-      >
-        <div :class="styles.cascadeColumns">
-          <div :class="styles.yearColumn">
-            <div
-              v-for="year in periodYears"
-              :key="year"
-              :class="[
-                styles.yearRow,
-                activeYear === year && styles.yearRowActive,
-              ]"
-              @mouseenter="onYearPointerEnter(year)"
-              @pointerenter="onYearPointerEnter(year)"
-            >
-              <EgFlotationMenuItem
-                host-tag="div"
-                box-type="text"
-                :label="String(year)"
-                :show-tag="false"
-                show-cascader
-                :focused="activeYear === year || isYearSelected(year)"
-              />
-            </div>
-          </div>
-          <div v-if="activeYear != null" :class="styles.monthColumn">
+      <div :class="styles.cascadeColumns">
+        <div :class="styles.yearColumn">
+          <div
+            v-for="year in periodYears"
+            :key="year"
+            :class="[
+              styles.yearRow,
+              activeYear === year && styles.yearRowActive,
+            ]"
+            @mouseenter="onYearPointerEnter(year)"
+            @pointerenter="onYearPointerEnter(year)"
+          >
             <EgFlotationMenuItem
-              v-for="month in monthsForActiveYear"
-              :key="`${activeYear}-${month.monthIndex}`"
+              host-tag="div"
               box-type="text"
-              :label="month.shortLabel"
+              :label="String(year)"
               :show-tag="false"
-              :focused="isMonthSelected(activeYear, month.monthIndex)"
-              @click="onMonthClick(activeYear, month.monthIndex)"
+              show-cascader
+              :focused="activeYear === year || isYearSelected(year)"
             />
           </div>
         </div>
-      </EgFlotationMenu>
-    </div>
+        <div v-if="activeYear != null" :class="styles.monthColumn">
+          <EgFlotationMenuItem
+            v-for="month in monthsForActiveYear"
+            :key="`${activeYear}-${month.monthIndex}`"
+            box-type="text"
+            :label="month.shortLabel"
+            :show-tag="false"
+            :focused="isMonthSelected(activeYear, month.monthIndex)"
+            @click="onMonthClick(activeYear, month.monthIndex)"
+          />
+        </div>
+      </div>
+    </EgFlotationMenu>
   </div>
 </template>

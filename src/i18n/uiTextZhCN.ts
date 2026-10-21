@@ -1144,6 +1144,8 @@ export const UI_TEXT_ZH_CN: Record<string, string> = {
   'Monthly Statement': '月度账单',
   'Export Monthly Statement': '导出月度账单',
   'Generate Monthly Statement': '生成月度账单',
+  Generate: '生成',
+  'Generation Record': '生成记录',
   Statement: '账单',
   'Monthly...': '月度...',
   Month: '月份',

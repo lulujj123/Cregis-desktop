@@ -54,6 +54,10 @@ const props = withDefaults(
     resolveHistoryEntry?: () => { title: string; subtitle?: string };
     /** Panel heading; defaults to Export (monthly statement uses Generate Monthly Statement). */
     panelTitle?: string;
+    /** Primary action catalog key; default Export (monthly statement uses Generate). */
+    actionLabelKey?: string;
+    /** History section title catalog key; default Export History. */
+    historyTitleKey?: string;
   }>(),
   {
     disabled: false,
@@ -63,6 +67,8 @@ const props = withDefaults(
     showScope: true,
     showDateRange: true,
     panelTitle: '',
+    actionLabelKey: 'Export',
+    historyTitleKey: 'Export History',
   },
 );
 
@@ -78,6 +84,9 @@ const emit = defineEmits<{
 const { locale, ui } = useAppI18n();
 
 const panelHeading = computed(() => props.panelTitle.trim() || ui('Export'));
+
+const actionLabel = computed(() => ui(props.actionLabelKey));
+const historyTitle = computed(() => ui(props.historyTitleKey));
 
 const expanded = ref(false);
 const rootRef = ref<HTMLElement | null>(null);
@@ -400,14 +409,14 @@ defineExpose({
                 :disabled="isExportHistoryLoading"
                 @click="onExportClick"
               >
-                {{ ui('Export') }}
+                {{ actionLabel }}
               </EgButton>
             </div>
 
             <EgDivider type="module" direction="horizontal" />
 
             <div :class="styles.history">
-              <div :class="styles.historyTitle">{{ ui('Export History') }}</div>
+              <div :class="styles.historyTitle">{{ historyTitle }}</div>
               <div :class="styles.historyList">
                 <div
                   v-for="item in historyItems"

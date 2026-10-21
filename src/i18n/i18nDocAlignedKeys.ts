@@ -357,6 +357,8 @@ export const I18N_DOC_ALIGNED_KEYS = new Set<string>([
   'Export CSV',
   'Export Monthly Statement',
   'Generate Monthly Statement',
+  'Generate',
+  'Generation Record',
   'Statement',
   'Export started',
   'Financial Time Zone',

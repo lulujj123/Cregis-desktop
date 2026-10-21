@@ -123,6 +123,8 @@ export const UI_TEXT_ZH_TW: Record<string, string> = {
   'Export scope': '導出範圍',
   'Export according to filter options': '按篩選條件導出',
   'Export all': '導出全部',
+  Generate: '生成',
+  'Generation Record': '生成紀錄',
   Download: '下載',
   Total: '共',
   Results: '條',
