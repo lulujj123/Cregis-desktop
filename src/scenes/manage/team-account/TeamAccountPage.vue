@@ -286,6 +286,8 @@ function resolveMonthlyHistoryEntry() {
                   prop="type"
                   :label="ui('Operation Type')"
                   min-width="200px"
+                  :display-order="2"
+                  :flex-grow="true"
                   :sortable="false"
                 >
                   <template #header>
@@ -330,6 +332,7 @@ function resolveMonthlyHistoryEntry() {
                   :label="ui('Time')"
                   :min-width="TEAM_ACCOUNT_TIME_COLUMN_MIN_WIDTH"
                   :width="TEAM_ACCOUNT_TIME_COLUMN_WIDTH"
+                  :display-order="1"
                   :sortable="false"
                 >
                   <template #header>
@@ -361,6 +364,7 @@ function resolveMonthlyHistoryEntry() {
                   prop="amount"
                   :label="ui('Amount')"
                   min-width="140px"
+                  :display-order="3"
                   align="right"
                   :sortable="false"
                 >
