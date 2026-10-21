@@ -31,6 +31,9 @@ import TeamAccountDisplayTimezoneControl from './TeamAccountDisplayTimezoneContr
 import {
   TEAM_ACCOUNT_TIME_COLUMN_MIN_WIDTH,
   TEAM_ACCOUNT_TIME_COLUMN_WIDTH,
+  TEAM_ACCOUNT_TX_AMOUNT_DISPLAY_ORDER,
+  TEAM_ACCOUNT_TX_TIME_DISPLAY_ORDER,
+  TEAM_ACCOUNT_TX_TYPE_DISPLAY_ORDER,
 } from './teamAccountColumnLayout';
 import { buildTeamAccountTimeCustomize } from './teamAccountListFieldCustomize';
 import TeamAccountMonthlyExportFields from './TeamAccountMonthlyExportFields.vue';
@@ -286,7 +289,7 @@ function resolveMonthlyHistoryEntry() {
                   prop="type"
                   :label="ui('Operation Type')"
                   min-width="200px"
-                  :display-order="2"
+                  :display-order="TEAM_ACCOUNT_TX_TYPE_DISPLAY_ORDER"
                   :flex-grow="true"
                   :sortable="false"
                 >
@@ -332,7 +335,7 @@ function resolveMonthlyHistoryEntry() {
                   :label="ui('Time')"
                   :min-width="TEAM_ACCOUNT_TIME_COLUMN_MIN_WIDTH"
                   :width="TEAM_ACCOUNT_TIME_COLUMN_WIDTH"
-                  :display-order="1"
+                  :display-order="TEAM_ACCOUNT_TX_TIME_DISPLAY_ORDER"
                   :sortable="false"
                 >
                   <template #header>
@@ -364,7 +367,7 @@ function resolveMonthlyHistoryEntry() {
                   prop="amount"
                   :label="ui('Amount')"
                   min-width="140px"
-                  :display-order="3"
+                  :display-order="TEAM_ACCOUNT_TX_AMOUNT_DISPLAY_ORDER"
                   align="right"
                   :sortable="false"
                 >
