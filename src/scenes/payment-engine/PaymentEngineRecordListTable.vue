@@ -320,6 +320,7 @@ function resolveColumnFlexGrow(column: PaymentEngineRecordColumnConfig): boolean
     :class="[
       styles.listRegion,
       props.dataListFill && batchListFillStyles.batchDetailDataListFill,
+      props.dataListFill && batchListFillStyles.batchDetailDataList,
     ]"
   >
 <EgDataList
