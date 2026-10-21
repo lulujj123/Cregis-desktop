@@ -156,6 +156,27 @@ if (
   changed += 1;
 }
 
+const responsiveColumnsTs = resolve(componentsSrc, 'organisms/data-list/useResponsiveColumns.ts');
+if (existsSync(responsiveColumnsTs)) {
+  let responsiveText = readFileSync(responsiveColumnsTs, 'utf8');
+  const appPreviewNeedle = "document.querySelector('.app-preview')";
+  if (!responsiveText.includes(appPreviewNeedle)) {
+    responsiveText = responsiveText.replace(
+      '  if (columns.length === 0) return [];\n\n  const budget',
+      `  if (columns.length === 0) return [];
+
+  // Desktop client shell (.app-preview): always keep every column; layout uses min-width + horizontal scroll.
+  if (typeof document !== 'undefined' && document.querySelector('.app-preview')) {
+    return columns.map((col) => col.slotIndex);
+  }
+
+  const budget`,
+    );
+    writeFileSync(responsiveColumnsTs, responsiveText, 'utf8');
+    changed += 1;
+  }
+}
+
 // Filter.vue: translate must not use useFilterTranslate() on the same component that provides it.
 const filterVue = resolve(componentsSrc, 'organisms/filter/Filter.vue');
 if (existsSync(filterVue)) {
