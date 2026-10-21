@@ -156,23 +156,56 @@ if (
   changed += 1;
 }
 
+const responsiveColumnsDesktop = resolve(compatRoot, 'useResponsiveColumns.desktop.ts');
 const responsiveColumnsTs = resolve(componentsSrc, 'organisms/data-list/useResponsiveColumns.ts');
-if (existsSync(responsiveColumnsTs)) {
-  let responsiveText = readFileSync(responsiveColumnsTs, 'utf8');
-  const appPreviewNeedle = "document.querySelector('.app-preview')";
-  if (!responsiveText.includes(appPreviewNeedle)) {
-    responsiveText = responsiveText.replace(
-      '  if (columns.length === 0) return [];\n\n  const budget',
-      `  if (columns.length === 0) return [];
-
-  // Desktop client shell (.app-preview): always keep every column; layout uses min-width + horizontal scroll.
-  if (typeof document !== 'undefined' && document.querySelector('.app-preview')) {
-    return columns.map((col) => col.slotIndex);
+if (existsSync(responsiveColumnsDesktop) && existsSync(responsiveColumnsTs)) {
+  const responsiveText = readFileSync(responsiveColumnsTs, 'utf8');
+  if (!responsiveText.includes('keepAllColumns')) {
+    copyFileSync(responsiveColumnsDesktop, responsiveColumnsTs);
+    changed += 1;
   }
+}
 
-  const budget`,
+const dataListVue = resolve(componentsSrc, 'organisms/data-list/DataList.vue');
+if (existsSync(dataListVue)) {
+  let dataListText = readFileSync(dataListVue, 'utf8');
+  if (!dataListText.includes('keepAllColumns: isDesktopAppPreviewShell()')) {
+    if (!dataListText.includes('function isDesktopAppPreviewShell')) {
+      dataListText = dataListText.replace(
+        'function visibleSlotsForSelectOffset(selectOffset: number) {',
+        `function isDesktopAppPreviewShell(): boolean {
+  if (typeof document === 'undefined') return false;
+  return Boolean(document.querySelector('.app-preview'));
+}
+
+function visibleSlotsForSelectOffset(selectOffset: number) {`,
+      );
+    }
+    dataListText = dataListText.replace(
+      '    selectOffsetPx: selectOffset,\n  });',
+      `    selectOffsetPx: selectOffset,\n    keepAllColumns: isDesktopAppPreviewShell(),\n  });`,
     );
-    writeFileSync(responsiveColumnsTs, responsiveText, 'utf8');
+    if (dataListText.includes('clientViewportWidth.value = document.documentElement.clientWidth;')) {
+      dataListText = dataListText.replace(
+        `function syncClientViewportWidth() {
+  if (typeof document === 'undefined') return;
+  clientViewportWidth.value = document.documentElement.clientWidth;
+}`,
+        `function syncClientViewportWidth() {
+  if (typeof document === 'undefined') return;
+  const preview = document.querySelector('.app-preview');
+  if (preview instanceof HTMLElement) {
+    const previewWidth = preview.getBoundingClientRect().width;
+    if (previewWidth > 0) {
+      clientViewportWidth.value = Math.round(previewWidth);
+      return;
+    }
+  }
+  clientViewportWidth.value = document.documentElement.clientWidth;
+}`,
+      );
+    }
+    writeFileSync(dataListVue, dataListText, 'utf8');
     changed += 1;
   }
 }

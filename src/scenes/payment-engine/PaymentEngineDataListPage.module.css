@@ -29,6 +29,15 @@
   width: 100%;
 }
 
+/* WaaS order-mode bulk transfer: nested LayoutChromePageStack must give the list a flex height. */
+.dataListNest :deep(.pageChromeBody) {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
 .listRegion {
   position: relative;
   flex: 1 1 auto;

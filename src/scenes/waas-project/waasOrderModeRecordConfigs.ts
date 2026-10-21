@@ -23,6 +23,7 @@ export const WAAS_ORDER_MODE_RECORD_PAGE_CONFIG: Record<
     showExport: true,
     toolbarPreset: 'filter-refresh',
     columns: BULK_TRANSFER_COLUMNS,
+    dataListFill: true,
   },
   'Refund Record': {
     showExport: true,

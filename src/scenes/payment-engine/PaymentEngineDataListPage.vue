@@ -639,6 +639,10 @@ watch(
 );
 
 onMounted(() => {
+  if (isPaymentBulkTransferRecordMenuItem(props.menuItem)) {
+    detailFlow.closeBulkTransferDetail();
+    detailFlow.clearBulkTransferDetailRow();
+  }
   registerPaymentEngineDetailFlow(detailFlow);
   registerPaymentEngineDataListShellApi({
     setListEmpty: (empty) => {
@@ -806,6 +810,21 @@ watch(
     }
     dismissLayoutDetail(true);
   },
+);
+
+watch(
+  [integratedPageKey, bulkTransferDetailRow],
+  () => {
+    if (
+      !isPaymentBulkTransferRecordMenuItem(props.menuItem)
+      || integratedPageKey.value !== 'detail'
+      || bulkTransferDetailRow.value
+    ) {
+      return;
+    }
+    dismissLayoutDetail(true);
+  },
+  { immediate: true },
 );
 
 const isFilterActive = computed(() =>
