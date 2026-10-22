@@ -23,11 +23,18 @@ export const CUSTOMER_SERVICE_REFUSAL_DEMO_TRIGGER = 'refuse-demo';
 export const CUSTOMER_SERVICE_REFUSAL_REPLY_KEY =
   'I’m unable to help with that request.';
 
-/** Message feedback glyphs (display only — not i18n). */
-export const CUSTOMER_SERVICE_FEEDBACK_THUMB_UP_GLYPH = '👍';
-export const CUSTOMER_SERVICE_FEEDBACK_THUMB_DOWN_GLYPH = '👎';
-
 export const CUSTOMER_SERVICE_TEAM_SWITCH_TIP_ICON = 'eds-light';
+
+/** User text containing any of these substrings shows the human-agent handoff offer. */
+export const CUSTOMER_SERVICE_HUMAN_AGENT_KEYWORDS = ['人工客服', '人工', '客服'] as const;
+
+export function messageRequestsHumanAgent(text: string): boolean {
+  const normalized = text.normalize('NFKC').replace(/\s/g, '');
+  if (!normalized) return false;
+  return CUSTOMER_SERVICE_HUMAN_AGENT_KEYWORDS.some((keyword) =>
+    normalized.includes(keyword),
+  );
+}
 
 export const CUSTOMER_SERVICE_FEEDBACK_TITLE_KEY = 'Feedback';
 
@@ -45,8 +52,7 @@ export const CUSTOMER_SERVICE_HANDOFF_REP_MESSAGE_KEY =
 /** Demo agent display name (field value — do not pass to `ui()`). */
 export const CUSTOMER_SERVICE_HANDOFF_REP_NAME = 'Alex Chen';
 
-export const CUSTOMER_SERVICE_TEAM_SWITCH_ANNOUNCEMENT_KEY =
-  'Switched to [{team}], AI permissions and SOP have been updated.';
+export const CUSTOMER_SERVICE_TEAM_SWITCH_ANNOUNCEMENT_KEY = 'Switched to [{team}].';
 
 export const CUSTOMER_SERVICE_FEEDBACK_OPTION_KEYS = [
   'Harmful or unsafe',

@@ -13,10 +13,9 @@ import { useScrollChromeScrim } from '@/scenes/tasks/shared/useScrollChromeScrim
 import CustomerServiceFeedbackSheet from './CustomerServiceFeedbackSheet.vue';
 import {
   CUSTOMER_SERVICE_DEMO_HISTORY,
-  CUSTOMER_SERVICE_FEEDBACK_THUMB_DOWN_GLYPH,
-  CUSTOMER_SERVICE_FEEDBACK_THUMB_UP_GLYPH,
   CUSTOMER_SERVICE_GREETING_KEY,
   CUSTOMER_SERVICE_HANDOFF_KEY,
+  messageRequestsHumanAgent,
   CUSTOMER_SERVICE_HANDOFF_OFFER_ACTION_KEY,
   CUSTOMER_SERVICE_HANDOFF_OFFER_PROMPT_KEY,
   CUSTOMER_SERVICE_HANDOFF_REP_MESSAGE_KEY,
@@ -56,8 +55,6 @@ type ChatSession = {
   messages: ChatMessage[];
   humanHandoff: boolean;
   handoffOfferPending: boolean;
-  /** Unique assistant messages the user has disliked (handoff after 2+). */
-  thumbsDownMessageIds: string[];
   messageFeedback: Record<string, MessageFeedback>;
 };
 
@@ -121,7 +118,6 @@ function createSessionBase(): Omit<ChatSession, 'id' | 'messages' | 'time' | 'to
     teamName: activeTeamDisplay.value,
     humanHandoff: false,
     handoffOfferPending: false,
-    thumbsDownMessageIds: [],
     messageFeedback: {},
   };
 }
@@ -158,7 +154,6 @@ function createDemoSession(
     ],
     humanHandoff: false,
     handoffOfferPending: false,
-    thumbsDownMessageIds: [],
     messageFeedback: {},
   };
 }
@@ -197,6 +192,17 @@ const showSuggestions = computed(
 
 const composerPlaceholder = computed(() => ui('Ask a question'));
 
+const showHumanHandoffOffer = computed(() => {
+  if (view.value !== 'chat') return false;
+  const session = sessions.value.find((item) => item.id === activeSessionId.value);
+  if (!session) return false;
+  return session.handoffOfferPending && !session.humanHandoff;
+});
+
+function syncSessionsList() {
+  sessions.value = [...sessions.value];
+}
+
 function firstAssistantMessageIndex(list: ChatMessage[]) {
   return list.findIndex((message) => message.role === 'assistant');
 }
@@ -218,6 +224,22 @@ function formatHandoffRepMessage() {
     '{name}',
     CUSTOMER_SERVICE_HANDOFF_REP_NAME,
   );
+}
+
+function dismissHandoffOffer(session: ChatSession) {
+  if (!session.handoffOfferPending) return;
+  session.handoffOfferPending = false;
+  syncSessionsList();
+}
+
+function offerHumanAgentHandoff(session: ChatSession) {
+  if (session.humanHandoff) return;
+  if (!session.handoffOfferPending) {
+    session.handoffOfferPending = true;
+    session.time = formatSessionTime();
+  }
+  syncSessionsList();
+  void scrollToLatest();
 }
 
 function pushAssistantMessage(
@@ -314,23 +336,18 @@ function openFeedbackSheet(messageId: string) {
 
 function onThumbDown(messageId: string) {
   const session = activeSession.value;
-  if (session.humanHandoff || session.handoffOfferPending) return;
+  if (session.humanHandoff) return;
+  dismissHandoffOffer(session);
   if (session.messageFeedback[messageId] === 'down') return;
 
   session.messageFeedback[messageId] = 'down';
-
-  const isFirstDownOnMessage = !session.thumbsDownMessageIds.includes(messageId);
-  if (isFirstDownOnMessage) {
-    session.thumbsDownMessageIds.push(messageId);
-  }
-
   openFeedbackSheet(messageId);
+}
 
-  if (session.thumbsDownMessageIds.length >= 2 && !session.handoffOfferPending) {
-    session.handoffOfferPending = true;
-    session.time = formatSessionTime();
-    void scrollToLatest();
-  }
+function onFeedbackSubmitted() {
+  const session = activeSession.value;
+  if (!isLiveFeedbackSession() || session.humanHandoff) return;
+  offerHumanAgentHandoff(session);
 }
 
 function hasUserMessage(session: ChatSession) {
@@ -344,6 +361,13 @@ function pushUserMessage(text: string, topicKey?: string) {
   if (!trimmed) return;
 
   const session = activeSession.value;
+  const requestsHumanAgent = messageRequestsHumanAgent(trimmed);
+
+  liveFeedbackSessionId.value = session.id;
+
+  if (session.handoffOfferPending && !requestsHumanAgent) {
+    dismissHandoffOffer(session);
+  }
 
   session.messages.push({
     id: createId('msg'),
@@ -360,6 +384,14 @@ function pushUserMessage(text: string, topicKey?: string) {
     }
   }
   session.time = formatSessionTime();
+
+  if (requestsHumanAgent && !session.humanHandoff) {
+    offerHumanAgentHandoff(session);
+    view.value = 'chat';
+    void scrollToLatest();
+    return;
+  }
+
   const reply = assistantReplyFor(trimmed);
   session.messages.push({
     id: createId('msg'),
@@ -403,6 +435,9 @@ function onNewChat() {
 }
 
 function onOpenHistory() {
+  if (isLiveFeedbackSession()) {
+    dismissHandoffOffer(activeSession.value);
+  }
   view.value = view.value === 'history' ? 'chat' : 'history';
   void nextTick(() => update());
 }
@@ -412,6 +447,9 @@ function onHistoryListPointerMove() {
 }
 
 function onSelectSession(id: string) {
+  if (isLiveFeedbackSession()) {
+    dismissHandoffOffer(activeSession.value);
+  }
   activeSessionId.value = id;
   liveFeedbackSessionId.value = null;
   feedbackSheetOpen.value = false;
@@ -469,7 +507,9 @@ watch(
     if (sequence === 0) return;
     const teamDisplayName = customerServiceState.teamSwitchDisplayName;
     if (!teamDisplayName) return;
-    appendTeamSwitchAnnouncement(activeSession.value, teamDisplayName);
+    const session = activeSession.value;
+    dismissHandoffOffer(session);
+    appendTeamSwitchAnnouncement(session, teamDisplayName);
     view.value = 'chat';
     void scrollToLatest();
   },
@@ -485,7 +525,7 @@ watch(
       <header :class="[styles.header, topScrim && styles.headerScrim]">
         <div :class="styles.brand">
           <span :class="styles.assistantAvatarSm" aria-hidden="true">
-            <EgIcon name="eds-sparkle" size="sm" fit />
+            <EgIcon name="eds-sparkle" size="sm" fit fill-tone="brand" />
           </span>
           <div :class="styles.brandCopy">
             <h2 :class="styles.title">{{ ui('CregisAI Assistant') }}</h2>
@@ -604,9 +644,14 @@ watch(
                 :class="styles.assistantAvatarXs"
                 aria-hidden="true"
               >
-                <EgIcon name="eds-sparkle" size="sm" fit />
+                <EgIcon name="eds-sparkle" size="sm" fit fill-tone="brand" />
               </span>
-              <p :class="[styles.bubble, message.role === 'user' && styles.bubbleUser]">
+              <p
+                :class="[
+                  styles.bubble,
+                  message.role === 'user' ? styles.bubbleUser : styles.bubbleAssistant,
+                ]"
+              >
                 {{ message.text }}
               </p>
             </div>
@@ -615,28 +660,34 @@ watch(
               :class="styles.feedbackRow"
             >
               <EgIconButton
+                :class="styles.feedbackThumbButton"
                 shape="square"
-                size="sm"
+                size="lg"
                 motion="ease"
                 :label="ui('Helpful')"
                 :active="activeSession.messageFeedback[message.id] === 'up'"
                 @click="onThumbUp(message.id)"
               >
-                <span :class="styles.feedbackGlyph" aria-hidden="true">
-                  {{ CUSTOMER_SERVICE_FEEDBACK_THUMB_UP_GLYPH }}
-                </span>
+                <EgIcon
+                  :class="styles.feedbackThumbIcon"
+                  name="eds-thumbs-up"
+                  fit
+                />
               </EgIconButton>
               <EgIconButton
+                :class="styles.feedbackThumbButton"
                 shape="square"
-                size="sm"
+                size="lg"
                 motion="ease"
                 :label="ui('Not helpful')"
                 :active="activeSession.messageFeedback[message.id] === 'down'"
                 @click="onThumbDown(message.id)"
               >
-                <span :class="styles.feedbackGlyph" aria-hidden="true">
-                  {{ CUSTOMER_SERVICE_FEEDBACK_THUMB_DOWN_GLYPH }}
-                </span>
+                <EgIcon
+                  :class="styles.feedbackThumbIcon"
+                  name="eds-thumbs-down"
+                  fit
+                />
               </EgIconButton>
             </div>
             </template>
@@ -654,14 +705,7 @@ watch(
             </button>
           </div>
 
-          <div
-            v-if="
-              isLiveFeedbackSession()
-                && activeSession.handoffOfferPending
-                && !activeSession.humanHandoff
-            "
-            :class="styles.announcementRow"
-          >
+          <div v-if="showHumanHandoffOffer" :class="styles.announcementRow">
             <div :class="styles.handoffOffer">
               <p :class="styles.handoffOfferPrompt">
                 {{ ui(CUSTOMER_SERVICE_HANDOFF_OFFER_PROMPT_KEY) }}
@@ -714,7 +758,7 @@ watch(
             motion="hover-enter-only"
             type="submit"
           >
-            <EgIcon name="eds-arrow-send-all-email" fit />
+            <EgIcon name="eds-send-out" size="sm" fit />
           </EgIconButton>
         </form>
       </footer>
@@ -723,6 +767,7 @@ watch(
     <CustomerServiceFeedbackSheet
       v-if="isLiveFeedbackSession()"
       v-model:open="feedbackSheetOpen"
+      @submit="onFeedbackSubmitted"
     />
   </div>
 </template>

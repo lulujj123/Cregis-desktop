@@ -432,7 +432,7 @@ export const I18N_DOC_ALIGNED_KEYS = new Set<string>([
   'Starter',
   'Business',
   'Enterprise',
-  'Switched to [{team}], AI permissions and SOP have been updated.',
+  'Switched to [{team}].',
   'New Chat',
   'No chat history',
   'Send Attachment',

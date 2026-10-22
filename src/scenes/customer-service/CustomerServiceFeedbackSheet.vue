@@ -12,6 +12,10 @@ import styles from './CustomerServiceFeedbackSheet.module.css';
 
 const open = defineModel<boolean>('open', { default: false });
 
+const emit = defineEmits<{
+  submit: [];
+}>();
+
 const { ui } = useAppI18n();
 
 const selectedOptionKey = ref<string | null>(null);
@@ -40,6 +44,7 @@ function onCancel() {
 
 function onSubmit() {
   if (!selectedOptionKey.value || !canSubmit.value) return;
+  emit('submit');
   open.value = false;
 }
 
@@ -67,10 +72,10 @@ watch(open, (isOpen) => {
         <EgButton
           v-for="key in CUSTOMER_SERVICE_FEEDBACK_OPTION_KEYS"
           :key="key"
-          variant="outline"
+          :variant="selectedOptionKey === key ? 'solid' : 'outline'"
           tone="subtle"
-          size="sm"
-          :active="selectedOptionKey === key"
+          size="md"
+          :aria-pressed="selectedOptionKey === key"
           @click="selectedOptionKey = key"
         >
           {{ ui(key) }}
@@ -88,7 +93,7 @@ watch(open, (isOpen) => {
       />
 
       <div :class="styles.actions">
-        <EgButton variant="outline" tone="subtle" size="md" @click="onCancel">
+        <EgButton tone="subtle" size="md" @click="onCancel">
           {{ ui('Cancel') }}
         </EgButton>
         <EgButton

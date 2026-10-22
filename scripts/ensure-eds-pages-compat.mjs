@@ -3,7 +3,7 @@
  * glue CSS that work-cregis-desktop still imports. Patch the sibling checkout in place
  * (idempotent) before prebuild / vite build.
  */
-import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -237,6 +237,17 @@ const t: FilterTranslate = (text) => props.translate?.(text) ?? text;
 provideFilterTranslate(t);`,
       );
     writeFileSync(filterVue, filterText, 'utf8');
+    changed += 1;
+  }
+}
+
+const iconCompatDir = resolve(compatRoot, 'icons');
+const iconsDestDir = resolve(componentsSrc, 'atoms/icons');
+if (existsSync(iconCompatDir)) {
+  mkdirSync(iconsDestDir, { recursive: true });
+  for (const name of readdirSync(iconCompatDir)) {
+    if (!name.endsWith('.svg')) continue;
+    copyFileSync(resolve(iconCompatDir, name), resolve(iconsDestDir, name));
     changed += 1;
   }
 }

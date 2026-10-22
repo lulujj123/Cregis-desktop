@@ -589,7 +589,16 @@ const usesIntegratedLayoutPageStack = computed(
   () => usesLayoutDetailPageStack.value || usesWebhookModulePageStack.value,
 );
 
-const hidesEgLayoutChrome = computed(() => usesIntegratedLayoutPageStack.value);
+/** WaaS 订单模式批量转账：列表 ToolBar/Paginer 走 EgLayout overlay（与订单记录一致），避免嵌套 chrome 塌高。 */
+const integratedListChromeInEgLayout = computed(
+  () =>
+    props.waasEgFilterListMode === 'order-mode'
+    && isPaymentBulkTransferRecordMenuItem(props.menuItem),
+);
+
+const hidesEgLayoutChrome = computed(
+  () => usesIntegratedLayoutPageStack.value && !integratedListChromeInEgLayout.value,
+);
 
 const layoutDetailPageMotionRef = ref<InstanceType<typeof LayoutChromePageStack> | null>(null);
 
@@ -936,7 +945,7 @@ function recordRow(data: DataListItem): PaymentEngineRecordRow {
         :page-key="integratedPageKey"
         @page-settled="onIntegratedLayoutPageSettled"
       >
-        <template #list-toolbar>
+        <template v-if="hidesEgLayoutChrome" #list-toolbar>
           <PaymentEngineRecordListToolbar
             :title="displayToolbarTitle"
             :show-toolbar-section="showToolbarSection"
@@ -1020,7 +1029,7 @@ function recordRow(data: DataListItem): PaymentEngineRecordRow {
           <slot name="module-stack-create" />
         </template>
 
-        <template #list-paginer>
+        <template v-if="hidesEgLayoutChrome" #list-paginer>
           <PaymentEngineRecordListPaginer
             v-model:settings-level-index="settingsLevelIndex"
             v-model:settings-jump-value="settingsJumpValue"

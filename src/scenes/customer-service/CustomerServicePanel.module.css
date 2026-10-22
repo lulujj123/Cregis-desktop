@@ -9,7 +9,7 @@
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-  background: var(--box-page);
+  background: var(--material-same-white-primary);
 }
 
 .scroll {
@@ -49,7 +49,7 @@
   gap: var(--spacing-3);
   min-width: 0;
   padding: var(--spacing-3) var(--spacing-4);
-  background: var(--box-page);
+  background: var(--material-same-white-primary);
   border-bottom: var(--stroke-xs) solid var(--stroke-outline-shallow);
 }
 
@@ -74,19 +74,31 @@
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
+  padding: var(--spacing-1);
   border-radius: var(--radius-full);
-  background: var(--material-brand-primary);
-  color: var(--text-same-white-primary);
+  background: color-mix(in srgb, var(--event-hover-brand-weaken) 30%, transparent);
+  color: var(--text-brand-primary);
+}
+
+.assistantAvatarSm :global(.eds-icon),
+.assistantAvatarXs :global(.eds-icon) {
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  color: var(--text-brand-primary);
 }
 
 .assistantAvatarSm {
-  width: var(--avatar-sm);
-  height: var(--avatar-sm);
+  width: var(--avatar-lg);
+  height: var(--avatar-lg);
 }
 
 .assistantAvatarXs {
-  width: var(--avatar-xs);
-  height: var(--avatar-xs);
+  width: var(--avatar-md);
+  height: var(--avatar-md);
 }
 
 .brandCopy {
@@ -157,7 +169,6 @@
   margin: 0;
   padding: var(--spacing-2) var(--spacing-3);
   border-radius: var(--radius-md);
-  background: var(--material-card-subtle);
   color: var(--text-base-primary);
   font-size: var(--eds-body-small-size);
   font-weight: var(--eds-body-small-weight);
@@ -165,9 +176,13 @@
   word-break: break-word;
 }
 
+.bubbleAssistant {
+  background: var(--material-card-moderate);
+}
+
 .bubbleUser {
-  background: var(--material-brand-primary);
-  color: var(--text-same-white-primary);
+  background: var(--status-success-weaken);
+  color: var(--text-base-primary);
 }
 
 .announcementRow {
@@ -236,7 +251,31 @@
   align-items: center;
   gap: var(--spacing-1);
   margin-top: calc(-1 * var(--spacing-1));
-  padding-left: calc(var(--avatar-xs) + var(--spacing-2));
+  padding-left: calc(var(--avatar-md) + var(--spacing-2));
+  /* Figma eds-thumbs-* symbols: 32×32 artboard (EverGreen Desktop · node 4875:884 / 4875:885). */
+  --feedback-thumb-size: var(--scale-8);
+}
+
+.feedbackThumbButton:global(.eds-icon-button.square) {
+  flex-shrink: 0;
+  width: var(--feedback-thumb-size);
+  height: var(--feedback-thumb-size);
+  min-width: var(--feedback-thumb-size);
+  min-height: var(--feedback-thumb-size);
+  padding: 0;
+}
+
+.feedbackThumbButton:global(.eds-icon-button.square) :global(.symbol) {
+  width: var(--feedback-thumb-size);
+  height: var(--feedback-thumb-size);
+  min-width: var(--feedback-thumb-size);
+  min-height: var(--feedback-thumb-size);
+}
+
+.feedbackRow .feedbackThumbIcon:global(.icon.fill) {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .feedbackGlyph {
@@ -254,7 +293,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: var(--spacing-2);
-  padding-left: calc(var(--avatar-xs) + var(--spacing-2));
+  padding-left: calc(var(--avatar-md) + var(--spacing-2));
 }
 
 .feedbackChoice {
@@ -282,9 +321,10 @@
 .suggestions {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: flex-end;
   gap: var(--spacing-2);
-  padding-left: calc(var(--spacing-8) + var(--spacing-2));
+  width: 100%;
+  min-width: 0;
 }
 
 .suggestion {
@@ -296,9 +336,9 @@
   background: var(--material-hide);
   color: var(--text-base-primary);
   font: inherit;
-  font-size: var(--eds-footnote-size);
-  font-weight: var(--eds-footnote-weight);
-  line-height: var(--eds-footnote-line-height);
+  font-size: var(--eds-body-small-size);
+  font-weight: var(--eds-body-small-weight);
+  line-height: var(--eds-body-small-line-height);
   text-align: left;
   appearance: none;
   cursor: pointer;
@@ -392,7 +432,7 @@
   z-index: 2;
   flex-shrink: 0;
   padding: var(--spacing-3) var(--spacing-4) var(--spacing-4);
-  background: var(--box-page);
+  background: var(--material-same-white-primary);
   border-top: var(--stroke-xs) solid var(--stroke-outline-shallow);
 }
 
