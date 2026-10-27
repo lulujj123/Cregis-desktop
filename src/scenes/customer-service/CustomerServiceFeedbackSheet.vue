@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { EgButton, EgTextarea } from '@eds/desktop-components';
+import { EgButton, EgDivider, EgTextarea } from '@eds/desktop-components';
 import { useAppI18n } from '@/composables/useAppI18n';
 import {
   CUSTOMER_SERVICE_FEEDBACK_DETAIL_PLACEHOLDER_KEY,
@@ -66,46 +66,52 @@ watch(open, (isOpen) => {
       :aria-label="ui(CUSTOMER_SERVICE_FEEDBACK_TITLE_KEY)"
       @click.stop
     >
-      <h3 :class="styles.title">{{ ui(CUSTOMER_SERVICE_FEEDBACK_TITLE_KEY) }}</h3>
+      <div :class="styles.sheetBody">
+        <h3 :class="styles.title">{{ ui(CUSTOMER_SERVICE_FEEDBACK_TITLE_KEY) }}</h3>
 
-      <div :class="styles.chipRow">
-        <EgButton
-          v-for="key in CUSTOMER_SERVICE_FEEDBACK_OPTION_KEYS"
-          :key="key"
-          :variant="selectedOptionKey === key ? 'solid' : 'outline'"
-          tone="subtle"
-          size="md"
-          :aria-pressed="selectedOptionKey === key"
-          @click="selectedOptionKey = key"
-        >
-          {{ ui(key) }}
-        </EgButton>
+        <div :class="styles.chipRow">
+          <EgButton
+            v-for="key in CUSTOMER_SERVICE_FEEDBACK_OPTION_KEYS"
+            :key="key"
+            :class="styles.chipOption"
+            :variant="selectedOptionKey === key ? 'solid' : 'outline'"
+            :tone="selectedOptionKey === key ? 'decor' : 'subtle'"
+            size="md"
+            :aria-pressed="selectedOptionKey === key"
+            @click="selectedOptionKey = key"
+          >
+            {{ ui(key) }}
+          </EgButton>
+        </div>
+
+        <EgTextarea
+          v-if="showDetailField"
+          v-model="detailText"
+          :class="styles.textarea"
+          width-mode="full"
+          :placeholder="ui(CUSTOMER_SERVICE_FEEDBACK_DETAIL_PLACEHOLDER_KEY)"
+          :paste-label="ui('Paste')"
+          :clear-label="ui('Clear')"
+        />
       </div>
 
-      <EgTextarea
-        v-if="showDetailField"
-        v-model="detailText"
-        :class="styles.textarea"
-        width-mode="full"
-        :placeholder="ui(CUSTOMER_SERVICE_FEEDBACK_DETAIL_PLACEHOLDER_KEY)"
-        :paste-label="ui('Paste')"
-        :clear-label="ui('Clear')"
-      />
-
-      <div :class="styles.actions">
-        <EgButton tone="subtle" size="md" @click="onCancel">
-          {{ ui('Cancel') }}
-        </EgButton>
-        <EgButton
-          variant="solid"
-          tone="decor"
-          size="md"
-          :disabled="!canSubmit"
-          @click="onSubmit"
-        >
-          {{ ui('Submit') }}
-        </EgButton>
-      </div>
+      <footer :class="styles.sheetFooter">
+        <EgDivider type="module" direction="horizontal" />
+        <div :class="styles.actions">
+          <EgButton tone="subtle" size="md" @click="onCancel">
+            {{ ui('Cancel') }}
+          </EgButton>
+          <EgButton
+            variant="solid"
+            tone="decor"
+            size="md"
+            :disabled="!canSubmit"
+            @click="onSubmit"
+          >
+            {{ ui('Submit') }}
+          </EgButton>
+        </div>
+      </footer>
     </div>
   </div>
 </template>
