@@ -30,6 +30,8 @@ import {
 
 export type ShellPageKey = `${string}:${string}`;
 
+export const CUSTOMER_SERVICE_SHELL_PAGE_KEY = 'Customer Service:CregisAI' as const satisfies ShellPageKey;
+
 function readAppLocale(): AppLocale {
   const lang = document.documentElement.lang.trim();
   if (lang === 'zh-CN' || lang === 'zh-TW') return lang;
@@ -331,10 +333,22 @@ function resolveTasksPageKeyFromPreview(preview: Element): ShellPageKey {
   return 'Tasks:unknown';
 }
 
+function resolveCustomerServicePageKeyFromPreview(preview: Element): ShellPageKey | null {
+  const host = preview.querySelector(
+    '.customer-service-popup-host[data-customer-service-open="true"]',
+  );
+  return host ? CUSTOMER_SERVICE_SHELL_PAGE_KEY : null;
+}
+
 export function resolvePageKeyFromDom(): ShellPageKey {
   const preview = document.querySelector('.app-preview');
   if (!preview) {
     return 'unknown:unknown';
+  }
+
+  const customerServicePageKey = resolveCustomerServicePageKeyFromPreview(preview);
+  if (customerServicePageKey) {
+    return customerServicePageKey;
   }
 
   const waasPageKey = resolveWaasPageKeyFromPreview(preview);
@@ -409,6 +423,10 @@ export function resolveShellPageDisplayName(
 
   if (pageKey === 'Account Settings:Preference') {
     return ui('Preference');
+  }
+
+  if (pageKey === CUSTOMER_SERVICE_SHELL_PAGE_KEY) {
+    return ui('CregisAI Assistant');
   }
 
   if (pageKey === 'App:Shell') {

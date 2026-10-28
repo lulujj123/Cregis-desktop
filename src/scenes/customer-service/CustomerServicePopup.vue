@@ -97,6 +97,7 @@ onBeforeUnmount(() => {
     v-if="popupMounted"
     ref="hostRef"
     class="customer-service-popup-host"
+    :data-customer-service-open="popupOpen ? 'true' : undefined"
     :class="styles.host"
     role="presentation"
   >

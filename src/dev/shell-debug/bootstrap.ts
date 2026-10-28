@@ -13,6 +13,7 @@ import './scenarios/waasHistoryCallbackScenarioPack';
 import './scenarios/webhookPushScenarioPack';
 import './scenarios/webhookConfigScenarioPack';
 import './scenarios/riskControlLogsScenarioPack';
+import './scenarios/customerServiceScenarioPack';
 
 initPreviewWindowMode();
 
@@ -28,3 +29,4 @@ export { registerWaasWalletPayoutScenarioPack } from './scenarios/waasWalletPayo
 export { registerWaasCallbackErrorScenarioPack } from './scenarios/waasCallbackErrorScenarioPack';
 export { registerWaasHistoryCallbackScenarioPack } from './scenarios/waasHistoryCallbackScenarioPack';
 export { registerWebhookPushScenarioPack } from './scenarios/webhookPushScenarioPack';
+export { registerCustomerServiceScenarioPack } from './scenarios/customerServiceScenarioPack';

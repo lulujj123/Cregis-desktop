@@ -164,6 +164,14 @@
   justify-content: flex-end;
 }
 
+.userMessageBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  max-width: calc(100% - var(--spacing-10));
+  min-width: 0;
+}
+
 .bubble {
   max-width: calc(100% - var(--spacing-10));
   margin: 0;
@@ -173,14 +181,70 @@
   font-size: var(--eds-body-small-size);
   font-weight: var(--eds-body-small-weight);
   line-height: var(--eds-body-small-line-height);
-  word-break: break-word;
+  overflow-wrap: break-word;
+  word-break: normal;
 }
 
 .bubbleAssistant {
   background: var(--material-card-moderate);
 }
 
+.assistantMessageBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+  max-width: calc(100% - var(--spacing-10));
+  min-width: 0;
+}
+
+.assistantMessageBlock .bubble {
+  max-width: 100%;
+}
+
+.inlineHandoffButton {
+  flex-shrink: 0;
+}
+
+.processingBubble {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-2);
+  animation: customerServiceProcessingFade var(--motion-duration-hover) var(--motion-easing-standard)
+    both;
+}
+
+.processingLabel {
+  color: var(--text-base-secondary);
+  font-size: var(--eds-body-small-size);
+  font-weight: var(--eds-body-small-weight);
+  line-height: var(--eds-body-small-line-height);
+  animation: customerServiceProcessingFade var(--motion-duration-hover) var(--motion-easing-standard)
+    both;
+}
+
+@keyframes customerServiceProcessingFade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .processingBubble,
+  .processingLabel {
+    animation: none;
+  }
+}
+
 .bubbleUser {
+  box-sizing: border-box;
+  width: fit-content;
+  max-width: 100%;
   background: var(--status-success-weaken);
   color: var(--text-base-primary);
 }
@@ -263,6 +327,7 @@
   min-width: var(--feedback-thumb-size);
   min-height: var(--feedback-thumb-size);
   padding: 0;
+  border-radius: var(--radius-sm);
 }
 
 .feedbackThumbButton:global(.eds-icon-button.square) :global(.symbol) {
@@ -270,6 +335,43 @@
   height: var(--feedback-thumb-size);
   min-width: var(--feedback-thumb-size);
   min-height: var(--feedback-thumb-size);
+}
+
+.feedbackThumbPending:global(.eds-icon-button.square:not(:disabled)),
+.feedbackThumbPending:global(.eds-icon-button.square:not(:disabled):hover),
+.feedbackThumbPending:global(.eds-icon-button.square:not(:disabled):focus-visible),
+.feedbackThumbPending:global(.eds-icon-button.square:not(:disabled):active) {
+  background-color: var(--material-card-moderate);
+}
+
+/* Thumbs up selected — grey chip + filled glyph (chat feedback reference). */
+.feedbackThumbFilled:global(.eds-icon-button.square:not(:disabled)),
+.feedbackThumbFilled:global(.eds-icon-button.square:not(:disabled):hover),
+.feedbackThumbFilled:global(.eds-icon-button.square:not(:disabled):focus-visible),
+.feedbackThumbFilled:global(.eds-icon-button.square:not(:disabled):active) {
+  background-color: var(--event-focus);
+}
+
+.feedbackThumbFilled:global(.eds-icon-button.square:not(:disabled)) :global(.symbol),
+.feedbackThumbFilled:global(.eds-icon-button.square:not(:disabled):hover) :global(.symbol),
+.feedbackThumbFilled:global(.eds-icon-button.square:not(:disabled):focus-visible) :global(.symbol),
+.feedbackThumbFilled:global(.eds-icon-button.square:not(:disabled):active) :global(.symbol) {
+  color: var(--stroke-base-secondary);
+}
+
+/* Thumbs down confirmed — grey active chip. */
+.feedbackThumbActive:global(.eds-icon-button.square:not(:disabled)),
+.feedbackThumbActive:global(.eds-icon-button.square:not(:disabled):hover),
+.feedbackThumbActive:global(.eds-icon-button.square:not(:disabled):focus-visible),
+.feedbackThumbActive:global(.eds-icon-button.square:not(:disabled):active) {
+  background-color: var(--event-focus);
+}
+
+.feedbackThumbActive:global(.eds-icon-button.square:not(:disabled)) :global(.symbol),
+.feedbackThumbActive:global(.eds-icon-button.square:not(:disabled):hover) :global(.symbol),
+.feedbackThumbActive:global(.eds-icon-button.square:not(:disabled):focus-visible) :global(.symbol),
+.feedbackThumbActive:global(.eds-icon-button.square:not(:disabled):active) :global(.symbol) {
+  color: var(--stroke-base-secondary);
 }
 
 .feedbackRow .feedbackThumbIcon:global(.icon.fill) {
@@ -328,6 +430,8 @@
 }
 
 .suggestion {
+  box-sizing: border-box;
+  width: fit-content;
   max-width: 100%;
   margin: 0;
   padding: var(--spacing-2) var(--spacing-3);
@@ -340,6 +444,8 @@
   font-weight: var(--eds-body-small-weight);
   line-height: var(--eds-body-small-line-height);
   text-align: left;
+  overflow-wrap: break-word;
+  word-break: normal;
   appearance: none;
   cursor: pointer;
   composes: motion-ease is-hover from global;

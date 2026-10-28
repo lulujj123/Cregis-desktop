@@ -48,6 +48,12 @@ export const COLLABORATION_LOCALE_OVERRIDES: Record<string, readonly [string, st
   'New Chat': ['新对话', '新對話'],
   'Send Attachment': ['发送附件', '發送附件'],
   'Ask a question': ['请输入问题', '請輸入問題'],
+  'This conversation has ended. Start a new chat for other inquiries.': [
+    '對話已經結束',
+    '對話已經結束',
+  ],
+  'Please enter': ['請輸入', '請輸入'],
+  'Enter your message': ['請輸入', '請輸入'],
   'Current conversation': ['当前对话', '當前對話'],
   'No chat history': ['暂无聊天记录', '暫無聊天記錄'],
   'Conversation History Records': ['历史对话记录', '歷史對話紀錄'],
@@ -71,7 +77,18 @@ export const COLLABORATION_LOCALE_OVERRIDES: Record<string, readonly [string, st
     '查一笔未到账订单（触发转人工）',
     '查一筆未到帳訂單（觸發轉人工）',
   ],
+  'Look up an unreceived order': ['查一笔未到账订单', '查一筆未到帳訂單'],
   'Connecting you to a human agent…': ['正在为您转接人工客服…', '正在為您轉接人工客服…'],
+  'Transfer to human agent': ['轉接人工客服', '轉接人工客服'],
+  'System notice: For data security, I cannot look up account balances, transaction details, or billing for you. Tap the button below to transfer to a human agent.': [
+    '系統提示：出於數據安全考量，我無法直接為您查詢帳戶餘額、交易明細或帳單資訊。請點擊下方按鈕轉接人工客服協助處理。',
+    '系統提示：出於數據安全考量，我無法直接為您查詢帳戶餘額、交易明細或帳單資訊。請點擊下方按鈕轉接人工客服協助處理。',
+  ],
+  'Leave a message': ['留言', '留言'],
+  'Thank you for your message. Our support team will reply soon. Reference: {ref}.': [
+    '謝謝你的留言，我們的客服會盡快回覆，參考編號：{ref}',
+    '謝謝你的留言，我們的客服會盡快回覆，參考編號：{ref}',
+  ],
   'I can help with that. Please tell me more.': [
     '我可以协助处理，请补充更多信息。',
     '我可以協助處理，請補充更多資訊。',

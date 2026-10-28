@@ -1226,6 +1226,9 @@ export const UI_TEXT_ZH_CN: Record<string, string> = {
   'New Chat': '新对话',
   'Send Attachment': '发送附件',
   'Ask a question': '请输入问题',
+  'This conversation has ended. Start a new chat for other inquiries.':
+    '對話已經結束',
+  'Enter your message': '請輸入',
   'Current conversation': '当前对话',
   'No chat history': '暂无聊天记录',
   'Conversation History Records': '历史对话记录',
@@ -1239,6 +1242,7 @@ export const UI_TEXT_ZH_CN: Record<string, string> = {
   'How do I configure team role permissions and risk-control rules?':
     '如何配置团队角色权限与风控规则？',
   'Look up an unreceived order (handoff to a human agent)': '查一笔未到账订单（触发转人工）',
+  'Look up an unreceived order': '查一笔未到账订单',
   'Connecting you to a human agent…': '正在为您转接人工客服…',
   'Would you like to learn more from a human agent?': '有需要與人工客服了解更多嗎？',
   'Transfer to human agent': '轉接人工客服',
@@ -1249,12 +1253,22 @@ export const UI_TEXT_ZH_CN: Record<string, string> = {
   'Harmful or unsafe': '有害/不安全',
   'False information': '虚假信息',
   'Not helpful feedback': '没有帮助',
+  'Inaccurate answer': '回答不準確',
+  'Invalid steps': '步驟無效',
+  'Irrelevant answer': '答非所問',
   Others: '其他',
+  'System notice: For data security, I cannot look up account balances, transaction details, or billing for you. Tap the button below to transfer to a human agent.':
+    '系統提示：出於數據安全考量，我無法直接為您查詢帳戶餘額、交易明細或帳單資訊。請點擊下方按鈕轉接人工客服協助處理。',
   'We want to know why you are dissatisfied with this answer, and what you think would be a better answer.':
     '我们想知道你对此回答不满意的原因，你认为更好的回答是什么？',
   Submit: '提交',
   'You are speaking with customer service representative "{name}".':
     '您正在与客户服务专员 "{name}"对话',
+  'Sorry, human agents are busy or outside business hours. To save time, tap Leave a message below or describe your issue here with screenshots. We will reply as soon as an agent is online.':
+    '抱歉，目前人工客服都在忙碌中（或非工作时间）。为了不耽误您的时间，您可以点击下方按钮留言，或直接在此描述您的问题并附上截图。客服人员上线后会第一时间回复您。',
+  'Leave a message': '留言',
+  'Thank you for your message. Our support team will reply soon. Reference: {ref}.':
+    '謝謝你的留言，我們的客服會盡快回覆，參考編號：{ref}',
   'I’m unable to help with that request.': '我无法协助处理该请求。',
   'Switch Team': '切换团队',
   'Create a Team': '创建团队',

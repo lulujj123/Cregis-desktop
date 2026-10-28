@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import {
   EgButton,
   EgIcon,
@@ -14,33 +14,52 @@ import CustomerServiceFeedbackSheet from './CustomerServiceFeedbackSheet.vue';
 import {
   CUSTOMER_SERVICE_DEMO_HISTORY,
   CUSTOMER_SERVICE_GREETING_KEY,
-  CUSTOMER_SERVICE_HANDOFF_KEY,
   messageRequestsHumanAgent,
   CUSTOMER_SERVICE_HANDOFF_OFFER_ACTION_KEY,
   CUSTOMER_SERVICE_HANDOFF_OFFER_PROMPT_KEY,
   CUSTOMER_SERVICE_HANDOFF_REP_MESSAGE_KEY,
   CUSTOMER_SERVICE_HANDOFF_REP_NAME,
+  CUSTOMER_SERVICE_HUMAN_AGENT_OFFLINE_REPLY_KEY,
+  CUSTOMER_SERVICE_LEAVE_MESSAGE_ACTION_KEY,
+  CUSTOMER_SERVICE_LEAVE_MESSAGE_REFERENCE,
+  CUSTOMER_SERVICE_LEAVE_MESSAGE_THANK_YOU_KEY,
   CUSTOMER_SERVICE_HISTORY_TITLE_KEY,
   CUSTOMER_SERVICE_PERSONAL_SPACE_KEY,
   CUSTOMER_SERVICE_REFUSAL_DEMO_TRIGGER,
   CUSTOMER_SERVICE_REFUSAL_REPLY_KEY,
+  CUSTOMER_SERVICE_SENSITIVE_DATA_REPLY_KEY,
+  CUSTOMER_SERVICE_ASSISTANT_PROCESSING_MS,
+  messageRequestsSensitiveBusinessData,
   CUSTOMER_SERVICE_SUGGESTION_KEYS,
   CUSTOMER_SERVICE_TEAM_SWITCH_ANNOUNCEMENT_KEY,
   CUSTOMER_SERVICE_TEAM_SWITCH_TIP_ICON,
   type CustomerServiceChatSpace,
 } from './customerService.constants';
 import { customerServiceState } from './customerServiceState';
+import {
+  registerCustomerServiceShellApi,
+  type CustomerServiceShellApi,
+} from './customerServiceShellApi';
 import styles from './CustomerServicePanel.module.css';
 
 type ChatRole = 'assistant' | 'user';
 
-type ChatMessageKind = 'normal' | 'feedback-question' | 'handoff' | 'team-switch-announcement';
+type ChatMessageKind =
+  | 'normal'
+  | 'feedback-question'
+  | 'handoff'
+  | 'team-switch-announcement'
+  | 'processing';
 
 type ChatMessage = {
   id: string;
   role: ChatRole;
   text: string;
   kind: ChatMessageKind;
+  showInlineHandoffAction?: boolean;
+  showLeaveMessageAction?: boolean;
+  /** Auto/service replies (e.g. agents offline) — no helpful / not helpful row. */
+  suppressFeedback?: boolean;
 };
 
 type MessageFeedback = 'up' | 'down';
@@ -56,6 +75,7 @@ type ChatSession = {
   humanHandoff: boolean;
   handoffOfferPending: boolean;
   messageFeedback: Record<string, MessageFeedback>;
+  composerLocked: boolean;
 };
 
 const emit = defineEmits<{
@@ -76,6 +96,7 @@ const scrollRef = ref<HTMLElement | null>(null);
 const contentRef = ref<HTMLElement | null>(null);
 const feedbackSheetOpen = ref(false);
 const feedbackSheetMessageId = ref<string | null>(null);
+const leaveMessageSheetOpen = ref(false);
 
 let nextId = 1;
 
@@ -119,6 +140,7 @@ function createSessionBase(): Omit<ChatSession, 'id' | 'messages' | 'time' | 'to
     humanHandoff: false,
     handoffOfferPending: false,
     messageFeedback: {},
+    composerLocked: false,
   };
 }
 
@@ -155,6 +177,7 @@ function createDemoSession(
     humanHandoff: false,
     handoffOfferPending: false,
     messageFeedback: {},
+    composerLocked: false,
   };
 }
 
@@ -190,7 +213,12 @@ const showSuggestions = computed(
     && !feedbackSheetOpen.value,
 );
 
-const composerPlaceholder = computed(() => ui('Ask a question'));
+const composerDisabled = computed(() => activeSession.value.composerLocked);
+const composerPlaceholder = computed(() =>
+  composerDisabled.value
+    ? ui('This conversation has ended. Start a new chat for other inquiries.')
+    : ui('Ask a question'),
+);
 
 const showHumanHandoffOffer = computed(() => {
   if (view.value !== 'chat') return false;
@@ -214,7 +242,8 @@ function isLiveFeedbackSession() {
 function shouldShowMessageFeedback(message: ChatMessage, messageIndex: number) {
   const session = activeSession.value;
   if (!isLiveFeedbackSession()) return false;
-  if (session.humanHandoff || session.handoffOfferPending) return false;
+  if (session.humanHandoff) return false;
+  if (message.suppressFeedback) return false;
   if (message.role !== 'assistant' || message.kind !== 'normal') return false;
   return messageIndex !== firstAssistantMessageIndex(messages.value);
 }
@@ -246,16 +275,156 @@ function pushAssistantMessage(
   session: ChatSession,
   text: string,
   kind: ChatMessageKind = 'normal',
+  options?: {
+    showInlineHandoffAction?: boolean;
+    showLeaveMessageAction?: boolean;
+    suppressFeedback?: boolean;
+  },
 ) {
   session.messages.push({
     id: createId('msg'),
     role: 'assistant',
     text,
     kind,
+    showInlineHandoffAction: options?.showInlineHandoffAction,
+    showLeaveMessageAction: options?.showLeaveMessageAction,
+    suppressFeedback: options?.suppressFeedback,
   });
 }
 
+function removeProcessingMessages(session: ChatSession) {
+  session.messages = session.messages.filter((message) => message.kind !== 'processing');
+}
+
+function pushProcessingMessage(session: ChatSession) {
+  session.messages.push({
+    id: createId('msg'),
+    role: 'assistant',
+    text: '',
+    kind: 'processing',
+  });
+}
+
+function wait(ms: number) {
+  return new Promise<void>((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
+}
+
+async function deliverAssistantReply(session: ChatSession, userText: string) {
+  pushProcessingMessage(session);
+  syncSessionsList();
+  await scrollToLatest();
+  await wait(CUSTOMER_SERVICE_ASSISTANT_PROCESSING_MS);
+  removeProcessingMessages(session);
+
+  if (messageRequestsSensitiveBusinessData(userText)) {
+    pushAssistantMessage(session, ui(CUSTOMER_SERVICE_SENSITIVE_DATA_REPLY_KEY), 'normal', {
+      showInlineHandoffAction: true,
+    });
+  } else {
+    const reply = assistantReplyFor(userText);
+    pushAssistantMessage(session, reply, 'normal');
+    if (reply === ui(CUSTOMER_SERVICE_REFUSAL_REPLY_KEY)) {
+      triggerHumanHandoff(session);
+    }
+  }
+
+  session.time = formatSessionTime();
+  syncSessionsList();
+  await scrollToLatest();
+}
+
+async function deliverHumanAgentKeywordFlow(session: ChatSession) {
+  pushProcessingMessage(session);
+  syncSessionsList();
+  await scrollToLatest();
+  await wait(CUSTOMER_SERVICE_ASSISTANT_PROCESSING_MS);
+  removeProcessingMessages(session);
+  offerHumanAgentHandoff(session);
+  syncSessionsList();
+  await scrollToLatest();
+}
+
 const HUMAN_HANDOFF_LOAD_DELAY_MS = 1200;
+
+function clearInlineHandoffActions(session: ChatSession) {
+  for (const message of session.messages) {
+    if (message.showInlineHandoffAction) {
+      message.showInlineHandoffAction = false;
+    }
+  }
+}
+
+async function deliverHumanAgentUnavailableReply(session: ChatSession) {
+  session.handoffOfferPending = false;
+  clearInlineHandoffActions(session);
+  feedbackSheetOpen.value = false;
+  feedbackSheetMessageId.value = null;
+
+  pushProcessingMessage(session);
+  syncSessionsList();
+  await scrollToLatest();
+  await wait(CUSTOMER_SERVICE_ASSISTANT_PROCESSING_MS);
+  removeProcessingMessages(session);
+
+  pushAssistantMessage(session, ui(CUSTOMER_SERVICE_HUMAN_AGENT_OFFLINE_REPLY_KEY), 'normal', {
+    suppressFeedback: true,
+    showLeaveMessageAction: true,
+  });
+  session.time = formatSessionTime();
+  syncSessionsList();
+  await scrollToLatest();
+}
+
+function resetLiveChatSession() {
+  const session = createSession();
+  sessions.value = [session, ...sessions.value];
+  activeSessionId.value = session.id;
+  liveFeedbackSessionId.value = session.id;
+  feedbackSheetOpen.value = false;
+  feedbackSheetMessageId.value = null;
+  draft.value = '';
+  view.value = 'chat';
+  syncSessionsList();
+}
+
+async function runHumanAgentsOfflineScenario() {
+  resetLiveChatSession();
+  const session = activeSession.value;
+  await deliverHumanAgentUnavailableReply(session);
+}
+
+function clearLeaveMessageActions(session: ChatSession) {
+  for (const message of session.messages) {
+    if (message.showLeaveMessageAction) {
+      message.showLeaveMessageAction = false;
+    }
+  }
+}
+
+function formatLeaveMessageThankYou() {
+  return ui(CUSTOMER_SERVICE_LEAVE_MESSAGE_THANK_YOU_KEY).replace(
+    '{ref}',
+    CUSTOMER_SERVICE_LEAVE_MESSAGE_REFERENCE,
+  );
+}
+
+function onLeaveMessageSubmitted() {
+  const session = activeSession.value;
+  clearLeaveMessageActions(session);
+  session.composerLocked = true;
+  pushAssistantMessage(session, formatLeaveMessageThankYou(), 'normal', {
+    suppressFeedback: true,
+  });
+  session.time = formatSessionTime();
+  syncSessionsList();
+  void scrollToLatest();
+}
+
+function openLeaveMessageSheet() {
+  leaveMessageSheetOpen.value = true;
+}
 
 function triggerHumanHandoff(session: ChatSession) {
   if (session.humanHandoff) return;
@@ -308,9 +477,6 @@ async function scrollToLatest() {
 }
 
 function assistantReplyFor(userText: string): string {
-  if (userText === ui(CUSTOMER_SERVICE_HANDOFF_KEY)) {
-    return ui('Connecting you to a human agent…');
-  }
   if (userText.toLowerCase().includes(CUSTOMER_SERVICE_REFUSAL_DEMO_TRIGGER)) {
     return ui(CUSTOMER_SERVICE_REFUSAL_REPLY_KEY);
   }
@@ -319,14 +485,24 @@ function assistantReplyFor(userText: string): string {
 
 function onAcceptHandoffOffer() {
   const session = activeSession.value;
-  if (!session.handoffOfferPending || session.humanHandoff) return;
+  if (session.humanHandoff) return;
+  const hasInlineHandoff = session.messages.some((message) => message.showInlineHandoffAction);
+  if (!session.handoffOfferPending && !hasInlineHandoff) return;
+  if (hasInlineHandoff) {
+    clearInlineHandoffActions(session);
+  }
   triggerHumanHandoff(session);
 }
 
 function onThumbUp(messageId: string) {
   const session = activeSession.value;
-  if (session.humanHandoff || session.handoffOfferPending) return;
+  if (session.humanHandoff) return;
+  if (session.messageFeedback[messageId] === 'down') return;
   session.messageFeedback[messageId] = 'up';
+  if (feedbackSheetMessageId.value === messageId) {
+    feedbackSheetOpen.value = false;
+  }
+  syncSessionsList();
 }
 
 function openFeedbackSheet(messageId: string) {
@@ -337,15 +513,19 @@ function openFeedbackSheet(messageId: string) {
 function onThumbDown(messageId: string) {
   const session = activeSession.value;
   if (session.humanHandoff) return;
-  dismissHandoffOffer(session);
   if (session.messageFeedback[messageId] === 'down') return;
-
-  session.messageFeedback[messageId] = 'down';
+  dismissHandoffOffer(session);
   openFeedbackSheet(messageId);
+  syncSessionsList();
 }
 
 function onFeedbackSubmitted() {
   const session = activeSession.value;
+  const messageId = feedbackSheetMessageId.value;
+  if (messageId) {
+    session.messageFeedback[messageId] = 'down';
+  }
+  syncSessionsList();
   if (!isLiveFeedbackSession() || session.humanHandoff) return;
   offerHumanAgentHandoff(session);
 }
@@ -361,6 +541,7 @@ function pushUserMessage(text: string, topicKey?: string) {
   if (!trimmed) return;
 
   const session = activeSession.value;
+  if (session.composerLocked) return;
   const requestsHumanAgent = messageRequestsHumanAgent(trimmed);
 
   liveFeedbackSessionId.value = session.id;
@@ -386,24 +567,13 @@ function pushUserMessage(text: string, topicKey?: string) {
   session.time = formatSessionTime();
 
   if (requestsHumanAgent && !session.humanHandoff) {
-    offerHumanAgentHandoff(session);
     view.value = 'chat';
-    void scrollToLatest();
+    void deliverHumanAgentKeywordFlow(session);
     return;
   }
 
-  const reply = assistantReplyFor(trimmed);
-  session.messages.push({
-    id: createId('msg'),
-    role: 'assistant',
-    text: reply,
-    kind: 'normal',
-  });
-  if (reply === ui(CUSTOMER_SERVICE_REFUSAL_REPLY_KEY)) {
-    triggerHumanHandoff(session);
-  }
   view.value = 'chat';
-  void scrollToLatest();
+  void deliverAssistantReply(session, trimmed);
 }
 
 function sendDraft() {
@@ -429,6 +599,7 @@ function onNewChat() {
   liveFeedbackSessionId.value = session.id;
   feedbackSheetOpen.value = false;
   feedbackSheetMessageId.value = null;
+  leaveMessageSheetOpen.value = false;
   draft.value = '';
   view.value = 'chat';
   void scrollToLatest();
@@ -514,6 +685,18 @@ watch(
     void scrollToLatest();
   },
 );
+
+const customerServiceShellApi: CustomerServiceShellApi = {
+  runHumanAgentsOfflineScenario,
+};
+
+onMounted(() => {
+  registerCustomerServiceShellApi(customerServiceShellApi);
+});
+
+onBeforeUnmount(() => {
+  registerCustomerServiceShellApi(null);
+});
 </script>
 
 <template>
@@ -633,6 +816,29 @@ watch(
               </p>
             </div>
             <div
+              v-else-if="message.kind === 'processing'"
+              :class="[styles.row, styles.rowAssistant]"
+            >
+              <span
+                :class="styles.assistantAvatarXs"
+                aria-hidden="true"
+              >
+                <EgIcon name="eds-sparkle" size="sm" fit fill-tone="brand" />
+              </span>
+              <div
+                :class="[
+                  styles.bubble,
+                  styles.bubbleAssistant,
+                  styles.processingBubble,
+                ]"
+                role="status"
+                :aria-label="ui('Processing')"
+              >
+                <EgIcon name="eds-more-with-basis" size="sm" />
+                <span :class="styles.processingLabel">{{ ui('Processing') }}</span>
+              </div>
+            </div>
+            <div
               v-else
               :class="[
                 styles.row,
@@ -646,46 +852,96 @@ watch(
               >
                 <EgIcon name="eds-sparkle" size="sm" fit fill-tone="brand" />
               </span>
-              <p
-                :class="[
-                  styles.bubble,
-                  message.role === 'user' ? styles.bubbleUser : styles.bubbleAssistant,
-                ]"
+              <div
+                :class="
+                  message.role === 'assistant'
+                    ? styles.assistantMessageBlock
+                    : styles.userMessageBlock
+                "
               >
-                {{ message.text }}
-              </p>
+                <p
+                  :class="[
+                    styles.bubble,
+                    message.role === 'user' ? styles.bubbleUser : styles.bubbleAssistant,
+                  ]"
+                >
+                  {{ message.text }}
+                </p>
+                <EgButton
+                  v-if="message.showInlineHandoffAction && !activeSession.humanHandoff"
+                  variant="outline"
+                  tone="subtle"
+                  size="sm"
+                  :class="styles.inlineHandoffButton"
+                  @click="onAcceptHandoffOffer"
+                >
+                  {{ ui(CUSTOMER_SERVICE_HANDOFF_OFFER_ACTION_KEY) }}
+                </EgButton>
+                <EgButton
+                  v-if="
+                    message.showLeaveMessageAction
+                      && !activeSession.composerLocked
+                  "
+                  variant="outline"
+                  tone="subtle"
+                  size="sm"
+                  :class="styles.inlineHandoffButton"
+                  @click="openLeaveMessageSheet"
+                >
+                  {{ ui(CUSTOMER_SERVICE_LEAVE_MESSAGE_ACTION_KEY) }}
+                </EgButton>
+              </div>
             </div>
             <div
               v-if="shouldShowMessageFeedback(message, messageIndex)"
               :class="styles.feedbackRow"
             >
               <EgIconButton
-                :class="styles.feedbackThumbButton"
+                :class="[
+                  styles.feedbackThumbButton,
+                  activeSession.messageFeedback[message.id] === 'up'
+                    && styles.feedbackThumbFilled,
+                ]"
                 shape="square"
                 size="lg"
                 motion="ease"
                 :label="ui('Helpful')"
-                :active="activeSession.messageFeedback[message.id] === 'up'"
+                :aria-pressed="activeSession.messageFeedback[message.id] === 'up'"
                 @click="onThumbUp(message.id)"
               >
                 <EgIcon
                   :class="styles.feedbackThumbIcon"
-                  name="eds-thumbs-up"
+                  :name="
+                    activeSession.messageFeedback[message.id] === 'up'
+                      ? 'eds-thumbs-up-filled'
+                      : 'eds-thumbs-up'
+                  "
                   fit
                 />
               </EgIconButton>
               <EgIconButton
-                :class="styles.feedbackThumbButton"
+                :class="[
+                  styles.feedbackThumbButton,
+                  activeSession.messageFeedback[message.id] === 'down'
+                    && styles.feedbackThumbActive,
+                  feedbackSheetOpen
+                    && feedbackSheetMessageId === message.id
+                    && styles.feedbackThumbPending,
+                ]"
                 shape="square"
                 size="lg"
                 motion="ease"
                 :label="ui('Not helpful')"
-                :active="activeSession.messageFeedback[message.id] === 'down'"
+                :aria-pressed="activeSession.messageFeedback[message.id] === 'down'"
                 @click="onThumbDown(message.id)"
               >
                 <EgIcon
                   :class="styles.feedbackThumbIcon"
-                  name="eds-thumbs-down"
+                  :name="
+                    activeSession.messageFeedback[message.id] === 'down'
+                      ? 'eds-thumbs-down-filled'
+                      : 'eds-thumbs-down'
+                  "
                   fit
                 />
               </EgIconButton>
@@ -732,6 +988,7 @@ watch(
               width-mode="full"
               :clearable="false"
               :overflow-feedback="false"
+              :disabled="composerDisabled"
               :placeholder="composerPlaceholder"
             />
           </div>
@@ -746,6 +1003,7 @@ watch(
             size="sm"
             :label="ui('Send Attachment')"
             motion="hover-enter-only"
+            :disabled="composerDisabled"
             @click="onAttachClick"
           >
             <EgIcon name="eds-paperclip" fit />
@@ -754,7 +1012,7 @@ watch(
             shape="square"
             size="sm"
             :label="ui('Send')"
-            :disabled="!draft.trim()"
+            :disabled="composerDisabled || !draft.trim()"
             motion="hover-enter-only"
             type="submit"
           >
@@ -767,7 +1025,14 @@ watch(
     <CustomerServiceFeedbackSheet
       v-if="isLiveFeedbackSession()"
       v-model:open="feedbackSheetOpen"
+      variant="feedback"
       @submit="onFeedbackSubmitted"
+    />
+    <CustomerServiceFeedbackSheet
+      v-if="isLiveFeedbackSession()"
+      v-model:open="leaveMessageSheetOpen"
+      variant="leave-message"
+      @submit="onLeaveMessageSubmitted"
     />
   </div>
 </template>

@@ -7,8 +7,20 @@ import {
   CUSTOMER_SERVICE_FEEDBACK_OPTION_KEYS,
   CUSTOMER_SERVICE_FEEDBACK_OTHER_KEY,
   CUSTOMER_SERVICE_FEEDBACK_TITLE_KEY,
+  CUSTOMER_SERVICE_LEAVE_MESSAGE_PLACEHOLDER_KEY,
+  CUSTOMER_SERVICE_LEAVE_MESSAGE_TITLE_KEY,
 } from './customerService.constants';
 import styles from './CustomerServiceFeedbackSheet.module.css';
+
+const props = withDefaults(
+  defineProps<{
+    /** `feedback` = thumbs-down sheet; `leave-message` = 留言 popup (Others-style textarea only). */
+    variant?: 'feedback' | 'leave-message';
+  }>(),
+  {
+    variant: 'feedback',
+  },
+);
 
 const open = defineModel<boolean>('open', { default: false });
 
@@ -21,11 +33,30 @@ const { ui } = useAppI18n();
 const selectedOptionKey = ref<string | null>(null);
 const detailText = ref('');
 
+const isLeaveMessage = computed(() => props.variant === 'leave-message');
+
+const dialogTitleKey = computed(() =>
+  isLeaveMessage.value
+    ? CUSTOMER_SERVICE_LEAVE_MESSAGE_TITLE_KEY
+    : CUSTOMER_SERVICE_FEEDBACK_TITLE_KEY,
+);
+
+const textareaPlaceholderKey = computed(() =>
+  isLeaveMessage.value
+    ? CUSTOMER_SERVICE_LEAVE_MESSAGE_PLACEHOLDER_KEY
+    : CUSTOMER_SERVICE_FEEDBACK_DETAIL_PLACEHOLDER_KEY,
+);
+
 const showDetailField = computed(
-  () => selectedOptionKey.value === CUSTOMER_SERVICE_FEEDBACK_OTHER_KEY,
+  () =>
+    isLeaveMessage.value
+    || selectedOptionKey.value === CUSTOMER_SERVICE_FEEDBACK_OTHER_KEY,
 );
 
 const canSubmit = computed(() => {
+  if (isLeaveMessage.value) {
+    return detailText.value.trim().length > 0;
+  }
   if (!selectedOptionKey.value) return false;
   if (selectedOptionKey.value === CUSTOMER_SERVICE_FEEDBACK_OTHER_KEY) {
     return detailText.value.trim().length > 0;
@@ -43,7 +74,8 @@ function onCancel() {
 }
 
 function onSubmit() {
-  if (!selectedOptionKey.value || !canSubmit.value) return;
+  if (!canSubmit.value) return;
+  if (!isLeaveMessage.value && !selectedOptionKey.value) return;
   emit('submit');
   open.value = false;
 }
@@ -63,13 +95,13 @@ watch(open, (isOpen) => {
     <div
       :class="styles.sheet"
       role="dialog"
-      :aria-label="ui(CUSTOMER_SERVICE_FEEDBACK_TITLE_KEY)"
+      :aria-label="ui(dialogTitleKey)"
       @click.stop
     >
       <div :class="styles.sheetBody">
-        <h3 :class="styles.title">{{ ui(CUSTOMER_SERVICE_FEEDBACK_TITLE_KEY) }}</h3>
+        <h3 :class="styles.title">{{ ui(dialogTitleKey) }}</h3>
 
-        <div :class="styles.chipRow">
+        <div v-if="!isLeaveMessage" :class="styles.chipRow">
           <EgButton
             v-for="key in CUSTOMER_SERVICE_FEEDBACK_OPTION_KEYS"
             :key="key"
@@ -89,7 +121,7 @@ watch(open, (isOpen) => {
           v-model="detailText"
           :class="styles.textarea"
           width-mode="full"
-          :placeholder="ui(CUSTOMER_SERVICE_FEEDBACK_DETAIL_PLACEHOLDER_KEY)"
+          :placeholder="ui(textareaPlaceholderKey)"
           :paste-label="ui('Paste')"
           :clear-label="ui('Clear')"
         />

@@ -468,6 +468,9 @@ export const UI_TEXT_ZH_TW: Record<string, string> = {
   'New Chat': '新對話',
   'Send Attachment': '發送附件',
   'Ask a question': '請輸入問題',
+  'This conversation has ended. Start a new chat for other inquiries.':
+    '對話已經結束',
+  'Enter your message': '請輸入',
   'Current conversation': '當前對話',
   'No chat history': '暫無聊天記錄',
   'Conversation History Records': '歷史對話紀錄',
@@ -481,7 +484,16 @@ export const UI_TEXT_ZH_TW: Record<string, string> = {
   'How do I configure team role permissions and risk-control rules?':
     '如何配置團隊角色權限與風控規則？',
   'Look up an unreceived order (handoff to a human agent)': '查一筆未到帳訂單（觸發轉人工）',
+  'Look up an unreceived order': '查一筆未到帳訂單',
   'Connecting you to a human agent…': '正在為您轉接人工客服…',
+  'Transfer to human agent': '轉接人工客服',
+  'System notice: For data security, I cannot look up account balances, transaction details, or billing for you. Tap the button below to transfer to a human agent.':
+    '系統提示：出於數據安全考量，我無法直接為您查詢帳戶餘額、交易明細或帳單資訊。請點擊下方按鈕轉接人工客服協助處理。',
+  'Sorry, human agents are busy or outside business hours. To save time, tap Leave a message below or describe your issue here with screenshots. We will reply as soon as an agent is online.':
+    '抱歉，目前人工客服都在忙碌中（或非工作時間）。為了不耽誤您的時間，您可以點擊下方按鈕留言，或直接在此描述您的問題並附上截圖。客服人員上線後會第一時間回覆您。',
+  'Leave a message': '留言',
+  'Thank you for your message. Our support team will reply soon. Reference: {ref}.':
+    '謝謝你的留言，我們的客服會盡快回覆，參考編號：{ref}',
   'I can help with that. Please tell me more.': '我可以協助處理，請補充更多資訊。',
   Send: '發送',
 };

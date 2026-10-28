@@ -12,10 +12,13 @@ export const CUSTOMER_SERVICE_GREETING_KEY =
 export const CUSTOMER_SERVICE_SUGGESTION_KEYS = [
   'How do I change the daily withdrawal limit?',
   'How do I configure team role permissions and risk-control rules?',
-  'Look up an unreceived order (handoff to a human agent)',
+  'Look up an unreceived order',
 ] as const;
 
-export const CUSTOMER_SERVICE_HANDOFF_KEY = 'Look up an unreceived order (handoff to a human agent)';
+export const CUSTOMER_SERVICE_UNRECEIVED_ORDER_SUGGESTION_KEY = 'Look up an unreceived order';
+
+/** @deprecated Use {@link CUSTOMER_SERVICE_UNRECEIVED_ORDER_SUGGESTION_KEY} */
+export const CUSTOMER_SERVICE_HANDOFF_KEY = CUSTOMER_SERVICE_UNRECEIVED_ORDER_SUGGESTION_KEY;
 
 /** Demo: user message containing this substring triggers AI refusal → human handoff. */
 export const CUSTOMER_SERVICE_REFUSAL_DEMO_TRIGGER = 'refuse-demo';
@@ -49,15 +52,61 @@ export const CUSTOMER_SERVICE_HANDOFF_OFFER_ACTION_KEY = 'Transfer to human agen
 export const CUSTOMER_SERVICE_HANDOFF_REP_MESSAGE_KEY =
   'You are speaking with customer service representative "{name}".';
 
+/** QA / shell API：转接人工后客服不在线或忙碌时的回复（不影响默认 live handoff）。 */
+export const CUSTOMER_SERVICE_HUMAN_AGENT_OFFLINE_REPLY_KEY =
+  'Sorry, human agents are busy or outside business hours. To save time, tap Leave a message below or describe your issue here with screenshots. We will reply as soon as an agent is online.';
+
+export const CUSTOMER_SERVICE_LEAVE_MESSAGE_ACTION_KEY = 'Leave a message';
+
+export const CUSTOMER_SERVICE_LEAVE_MESSAGE_TITLE_KEY = 'Leave a message';
+
+export const CUSTOMER_SERVICE_LEAVE_MESSAGE_PLACEHOLDER_KEY = 'Enter your message';
+
+export const CUSTOMER_SERVICE_LEAVE_MESSAGE_THANK_YOU_KEY =
+  'Thank you for your message. Our support team will reply soon. Reference: {ref}.';
+
+/** Demo reference id (field value — do not pass to `ui()`). */
+export const CUSTOMER_SERVICE_LEAVE_MESSAGE_REFERENCE = 'A2345567';
+
+/** Shell QA 演示用用户消息（触发敏感数据 + 转接按钮）。 */
+export const CUSTOMER_SERVICE_SHELL_SENSITIVE_DEMO_QUERY = '查余额';
+
 /** Demo agent display name (field value — do not pass to `ui()`). */
 export const CUSTOMER_SERVICE_HANDOFF_REP_NAME = 'Alex Chen';
 
 export const CUSTOMER_SERVICE_TEAM_SWITCH_ANNOUNCEMENT_KEY = 'Switched to [{team}].';
 
+export const CUSTOMER_SERVICE_ASSISTANT_PROCESSING_MS = 1000;
+
+export const CUSTOMER_SERVICE_SENSITIVE_DATA_REPLY_KEY =
+  'System notice: For data security, I cannot look up account balances, transaction details, or billing for you. Tap the button below to transfer to a human agent.';
+
+/** User message matching these patterns gets {@link CUSTOMER_SERVICE_SENSITIVE_DATA_REPLY_KEY}. */
+export function messageRequestsSensitiveBusinessData(text: string): boolean {
+  const normalized = text.normalize('NFKC').replace(/\s/g, '').toLowerCase();
+  if (!normalized) return false;
+  const patterns = [
+    '查詢交易數據',
+    '查询交易数据',
+    '業務數據查詢',
+    '业务数据查询',
+    '查餘額',
+    '查余额',
+    '余额',
+    'txid',
+    't×id',
+    '帳單',
+    '账单',
+  ];
+  return patterns.some((pattern) =>
+    normalized.includes(pattern.normalize('NFKC').replace(/\s/g, '').toLowerCase()),
+  );
+}
+
 export const CUSTOMER_SERVICE_FEEDBACK_OPTION_KEYS = [
-  'Harmful or unsafe',
-  'False information',
-  'Not helpful feedback',
+  'Inaccurate answer',
+  'Invalid steps',
+  'Irrelevant answer',
   'Others',
 ] as const;
 
@@ -83,7 +132,7 @@ export const CUSTOMER_SERVICE_DEMO_HISTORY = [
   },
   {
     topicKey: 'Unreceived Order Inquiry',
-    messageKey: 'Look up an unreceived order (handoff to a human agent)',
+    messageKey: CUSTOMER_SERVICE_UNRECEIVED_ORDER_SUGGESTION_KEY,
     space: 'personal' as const,
     time: '2026-10-14 09:12',
   },
